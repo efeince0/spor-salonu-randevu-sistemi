@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace WebTeknolojileriProje.Models
+namespace SporSalonuRandevu.Models
 {
     public class Uye : IdentityUser
     {
