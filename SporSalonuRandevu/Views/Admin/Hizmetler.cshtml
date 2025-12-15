@@ -1,0 +1,44 @@
+﻿@model List<SporSalonuRandevu.Models.Hizmet>
+
+@{
+    ViewData["Title"] = "Hizmet Yönetimi";
+}
+
+<h2>Hizmetler</h2>
+
+<a class="btn btn-success mb-3" asp-action="HizmetEkle">Yeni Hizmet Ekle</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Ad</th>
+            <th>Süre (dk)</th>
+            <th>Ücret (₺)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var h in Model)
+        {
+            <tr>
+                <td>@h.Ad</td>
+                <td>@h.SureDakika</td>
+                <td>@h.Ucret</td>
+                <td>
+                    <a class="btn btn-warning btn-sm"
+                       asp-action="HizmetGuncelle"
+                       asp-route-id="@h.Id">
+                        Güncelle
+                    </a>
+                    <a class="btn btn-danger btn-sm ms-1"
+                       asp-action="HizmetSil"
+                       asp-route-id="@h.Id"
+                       onclick="return confirm('Bu hizmeti silmek istiyor musunuz?');">
+                        Sil
+                    </a>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>

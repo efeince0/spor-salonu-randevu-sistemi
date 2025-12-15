@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SporSalonuRandevu.Data;
@@ -11,9 +12,11 @@ using SporSalonuRandevu.Data;
 namespace SporSalonuRandevu.Migrations
 {
     [DbContext(typeof(UygulamaDbContext))]
-    partial class UygulamaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251213195601_AddSalonHizmetAntrenorTables")]
+    partial class AddSalonHizmetAntrenorTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,34 @@ namespace SporSalonuRandevu.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Hizmet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SalonId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SureDakika")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Ucret")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SalonId");
+
+                    b.ToTable("Hizmetler");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -166,35 +197,17 @@ namespace SporSalonuRandevu.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("SalonId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Uzmanlik")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SalonId");
+
                     b.ToTable("Antrenorler");
-                });
-
-            modelBuilder.Entity("SporSalonuRandevu.Models.Hizmet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Ad")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("SureDakika")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("Ucret")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Hizmetler");
                 });
 
             modelBuilder.Entity("SporSalonuRandevu.Models.Randevu", b =>
@@ -215,6 +228,9 @@ namespace SporSalonuRandevu.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("SalonId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("Tarih")
                         .HasColumnType("timestamp with time zone");
 
@@ -228,9 +244,31 @@ namespace SporSalonuRandevu.Migrations
 
                     b.HasIndex("HizmetId");
 
+                    b.HasIndex("SalonId");
+
                     b.HasIndex("UyeId");
 
                     b.ToTable("Randevular");
+                });
+
+            modelBuilder.Entity("SporSalonuRandevu.Models.Salon", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Adres")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Salonlar");
                 });
 
             modelBuilder.Entity("SporSalonuRandevu.Models.Uye", b =>
@@ -309,6 +347,17 @@ namespace SporSalonuRandevu.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Hizmet", b =>
+                {
+                    b.HasOne("SporSalonuRandevu.Models.Salon", "Salon")
+                        .WithMany("Hizmetler")
+                        .HasForeignKey("SalonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Salon");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -360,6 +409,17 @@ namespace SporSalonuRandevu.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SporSalonuRandevu.Models.Antrenor", b =>
+                {
+                    b.HasOne("SporSalonuRandevu.Models.Salon", "Salon")
+                        .WithMany("Antrenorler")
+                        .HasForeignKey("SalonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Salon");
+                });
+
             modelBuilder.Entity("SporSalonuRandevu.Models.Randevu", b =>
                 {
                     b.HasOne("SporSalonuRandevu.Models.Antrenor", "Antrenor")
@@ -368,9 +428,15 @@ namespace SporSalonuRandevu.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SporSalonuRandevu.Models.Hizmet", "Hizmet")
+                    b.HasOne("Hizmet", "Hizmet")
                         .WithMany("Randevular")
                         .HasForeignKey("HizmetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SporSalonuRandevu.Models.Salon", "Salon")
+                        .WithMany("Randevular")
+                        .HasForeignKey("SalonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -384,7 +450,14 @@ namespace SporSalonuRandevu.Migrations
 
                     b.Navigation("Hizmet");
 
+                    b.Navigation("Salon");
+
                     b.Navigation("Uye");
+                });
+
+            modelBuilder.Entity("Hizmet", b =>
+                {
+                    b.Navigation("Randevular");
                 });
 
             modelBuilder.Entity("SporSalonuRandevu.Models.Antrenor", b =>
@@ -392,8 +465,12 @@ namespace SporSalonuRandevu.Migrations
                     b.Navigation("Randevular");
                 });
 
-            modelBuilder.Entity("SporSalonuRandevu.Models.Hizmet", b =>
+            modelBuilder.Entity("SporSalonuRandevu.Models.Salon", b =>
                 {
+                    b.Navigation("Antrenorler");
+
+                    b.Navigation("Hizmetler");
+
                     b.Navigation("Randevular");
                 });
 #pragma warning restore 612, 618

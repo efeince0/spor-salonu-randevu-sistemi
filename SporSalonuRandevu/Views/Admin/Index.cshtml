@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Admin Paneli";
+}
+
+<h2>Admin Paneli</h2>
+<p>Sistem genel durumu</p>
+
+<div class="row mt-4">
+
+    <div class="col-md-4">
+        <div class="card text-center border-primary">
+            <div class="card-body">
+                <h5 class="card-title">Toplam Hizmet</h5>
+                <h3>@ViewBag.HizmetSayisi</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h5 class="card-title">Toplam Antrenör</h5>
+                <h3>@ViewBag.AntrenorSayisi</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <h5 class="card-title">Toplam Randevu</h5>
+                <h3>@ViewBag.RandevuSayisi</h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- YÖNETİM BUTONLARI -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <a class="btn btn-outline-primary w-100" asp-action="Hizmetler">
+            Hizmet Yönetimi
+        </a>
+    </div>
+
+    <div class="col-md-6">
+        <a class="btn btn-outline-success w-100" asp-action="Antrenorler">
+            Antrenör Yönetimi
+        </a>
+    </div>
+</div>

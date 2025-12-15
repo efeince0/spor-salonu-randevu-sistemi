@@ -1,0 +1,19 @@
+﻿@model SporSalonuRandevu.Models.Antrenor
+
+<h2>Antrenör Güncelle</h2>
+
+<form asp-action="AntrenorGuncelle" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-2">
+        <label>Ad Soyad</label>
+        <input asp-for="AdSoyad" class="form-control" />
+    </div>
+
+    <div class="mb-2">
+        <label>Uzmanlık</label>
+        <input asp-for="Uzmanlik" class="form-control" />
+    </div>
+
+    <button class="btn btn-primary">Güncelle</button>
+</form>

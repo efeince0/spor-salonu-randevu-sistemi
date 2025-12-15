@@ -10,9 +10,6 @@
         public string UyeId { get; set; } = null!;
         public Uye Uye { get; set; } = null!;
 
-        public int SalonId { get; set; }
-        public Salon Salon { get; set; } = null!;
-
         public int HizmetId { get; set; }
         public Hizmet Hizmet { get; set; } = null!;
 

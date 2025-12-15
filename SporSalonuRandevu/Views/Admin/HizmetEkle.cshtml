@@ -1,0 +1,27 @@
+﻿@model SporSalonuRandevu.Models.Hizmet
+
+@{
+    ViewData["Title"] = "Hizmet Ekle";
+}
+
+<h2>Hizmet Ekle</h2>
+
+<form asp-action="HizmetEkle" method="post">
+    <div class="mb-3">
+        <label class="form-label">Hizmet Adı</label>
+        <input asp-for="Ad" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Süre (dk)</label>
+        <input asp-for="SureDakika" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Ücret</label>
+        <input asp-for="Ucret" class="form-control" />
+    </div>
+
+    <button class="btn btn-primary">Kaydet</button>
+    <a class="btn btn-secondary" asp-action="Hizmetler">İptal</a>
+</form>
