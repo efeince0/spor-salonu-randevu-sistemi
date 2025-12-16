@@ -3,9 +3,13 @@
     public class Antrenor
     {
         public int Id { get; set; }
-        public string AdSoyad { get; set; } = null!;
-        public string? Uzmanlik { get; set; }
+        public string AdSoyad { get; set; }
+        public string Uzmanlik { get; set; }
 
-        public ICollection<Randevu> Randevular { get; set; } = new List<Randevu>();
+        public TimeSpan CalismaBaslangic { get; set; }
+        public TimeSpan CalismaBitis { get; set; }
     }
+
+
 }
+    

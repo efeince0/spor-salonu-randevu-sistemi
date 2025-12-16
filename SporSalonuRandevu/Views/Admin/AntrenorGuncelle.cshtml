@@ -1,19 +1,37 @@
 ﻿@model SporSalonuRandevu.Models.Antrenor
 
-<h2>Antrenör Güncelle</h2>
-
-<form asp-action="AntrenorGuncelle" method="post">
-    <input type="hidden" asp-for="Id" />
-
-    <div class="mb-2">
-        <label>Ad Soyad</label>
-        <input asp-for="AdSoyad" class="form-control" />
+<div class="card shadow-sm col-md-6">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">✏️ Antrenör Güncelle</h5>
     </div>
 
-    <div class="mb-2">
-        <label>Uzmanlık</label>
-        <input asp-for="Uzmanlik" class="form-control" />
-    </div>
+    <div class="card-body">
+        <form asp-action="AntrenorGuncelle" method="post">
+            <input type="hidden" asp-for="Id" />
 
-    <button class="btn btn-primary">Güncelle</button>
-</form>
+            <div class="mb-3">
+                <label class="form-label">Ad Soyad</label>
+                <input asp-for="AdSoyad" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Uzmanlık</label>
+                <input asp-for="Uzmanlik" class="form-control" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Çalışma Başlangıç</label>
+                    <input asp-for="CalismaBaslangic" type="time" class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Çalışma Bitiş</label>
+                    <input asp-for="CalismaBitis" type="time" class="form-control" />
+                </div>
+            </div>
+
+            <button class="btn btn-primary w-100">Güncelle</button>
+        </form>
+    </div>
+</div>

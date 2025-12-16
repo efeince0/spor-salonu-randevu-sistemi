@@ -1,0 +1,46 @@
+﻿@model List<SporSalonuRandevu.Models.Antrenor>
+
+@{
+    ViewData["Title"] = "Antrenör Seç";
+    // Controller'dan gelen HizmetId'yi alıyoruz
+    var hizmetId = ViewBag.HizmetId;
+}
+
+<div class="container mt-4">
+    <h2>Antrenör Seç</h2>
+    <p class="text-muted">Lütfen çalışmak istediğiniz antrenörü seçiniz.</p>
+
+    <div class="row">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    Sistemde kayıtlı antrenör bulunamadı.
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var antrenor in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+
+                            <h5 class="card-title fw-bold">@antrenor.AdSoyad</h5>
+
+                            <p class="text-muted">@(antrenor.Uzmanlik ?? "Genel Antrenör")</p>
+
+                            <hr />
+
+                            <a href="/Randevu/SaatSec?antrenorId=@antrenor.Id&hizmetId=@hizmetId"
+                               class="btn btn-primary w-100">
+                                Antrenörü Seç
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

@@ -1,0 +1,148 @@
+﻿@{
+    ViewData["Title"] = "Saat Seç";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">Randevu Saati Belirle</h3>
+        </div>
+        <div class="card-body">
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Tarih Seçiniz:</label>
+                <input type="date" id="tarih" class="form-control form-control-lg" />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Müsait Saatler:</label>
+                <div id="saatler" class="d-flex flex-wrap gap-2">
+                    <span class="text-muted fst-italic">Lütfen önce tarih seçiniz.</span>
+                </div>
+            </div>
+
+            <div id="onayKutusu" style="display:none;" class="mt-4 pt-3 border-top">
+                <p class="text-success fw-bold" id="secilenSaatBilgi"></p>
+                <button id="btnKaydet" class="btn btn-success btn-lg w-100">
+                    Randevuyu Onayla ve Bitir
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Controller'dan gelen ID'leri alıyoruz
+    const antrenorId = @ViewBag.AntrenorId;
+    const hizmetId = @ViewBag.HizmetId;
+
+    const tarihInput = document.getElementById("tarih");
+    const container = document.getElementById("saatler");
+    const onayKutusu = document.getElementById("onayKutusu");
+    const btnKaydet = document.getElementById("btnKaydet");
+    const secilenSaatBilgi = document.getElementById("secilenSaatBilgi");
+
+    let secilenSaat = null; // Seçilen saati hafızada tutmak için
+
+    // 1) TARİH DEĞİŞİNCE SAATLERİ GETİR
+    tarihInput.addEventListener("change", function () {
+        const tarih = this.value;
+
+        // Ekranı temizle
+        secilenSaat = null;
+        onayKutusu.style.display = "none";
+        container.innerHTML = "<div class='spinner-border text-primary' role='status'></div> Yükleniyor...";
+
+        if (!tarih) return;
+
+        // API'ye istek at
+        fetch(`/api/RandevuApi/MusaitSaatler?antrenorId=${antrenorId}&hizmetId=${hizmetId}&tarih=${tarih}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Veri çekilemedi");
+                return res.json();
+            })
+            .then(data => {
+                container.innerHTML = ""; // Yükleniyor yazısını sil
+
+                if (data.length === 0) {
+                    container.innerHTML = "<div class='alert alert-warning w-100'>Bu tarihte uygun saat bulunamadı.</div>";
+                    return;
+                }
+
+                // Gelen saatleri buton olarak ekle
+                data.forEach(saat => {
+                    const btn = document.createElement("button");
+                    btn.className = "btn btn-outline-primary px-4 py-2"; // Bootstrap sınıfları
+                    btn.innerText = saat;
+
+                    // Butona tıklama olayı
+                    btn.onclick = () => {
+                        // Diğer butonların rengini sıfırla
+                        document.querySelectorAll("#saatler button").forEach(b => {
+                            b.classList.remove("btn-primary");
+                            b.classList.add("btn-outline-primary");
+                        });
+
+                        // Tıklanan butonu mavi yap
+                        btn.classList.remove("btn-outline-primary");
+                        btn.classList.add("btn-primary");
+
+                        // Seçimi kaydet ve onay butonunu göster
+                        secilenSaat = saat;
+                        secilenSaatBilgi.innerText = `Seçilen Saat: ${saat}`;
+                        onayKutusu.style.display = "block";
+                    };
+
+                    container.appendChild(btn);
+                });
+            })
+            .catch(err => {
+                container.innerHTML = "<p class='text-danger'>Hata oluştu, lütfen tekrar deneyin.</p>";
+                console.error(err);
+            });
+    });
+
+    // 2) KAYDET BUTONUNA BASINCA
+    btnKaydet.addEventListener("click", function () {
+        if (!secilenSaat) {
+            alert("Lütfen bir saat seçin!");
+            return;
+        }
+
+        const veri = {
+            antrenorId: antrenorId,
+            hizmetId: hizmetId,
+            tarih: tarihInput.value,
+            saat: secilenSaat
+        };
+
+        // Butonu kilitle (çift tıklamayı engelle)
+        btnKaydet.disabled = true;
+        btnKaydet.innerText = "İşleniyor...";
+
+        fetch('/api/RandevuApi/randevu-olustur', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(veri)
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert("Randevunuz başarıyla oluşturuldu!");
+                    window.location.href = "/"; // Anasayfaya yönlendir
+                } else if (res.status === 401) {
+                    alert("Randevu almak için giriş yapmalısınız!");
+                    window.location.href = "/Identity/Account/Login"; // Giriş sayfasına yönlendir
+                } else {
+                    alert("Bir hata oluştu.");
+                    btnKaydet.disabled = false;
+                    btnKaydet.innerText = "Randevuyu Onayla ve Bitir";
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Sunucu hatası.");
+                btnKaydet.disabled = false;
+            });
+    });
+</script>

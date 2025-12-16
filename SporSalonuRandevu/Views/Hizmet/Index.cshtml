@@ -4,24 +4,60 @@
     ViewData["Title"] = "Hizmetler";
 }
 
-<h2>Hizmetler</h2>
+<h2 class="mb-4 text-center">💪 Hizmetlerimiz</h2>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Ad</th>
-            <th>Süre (dk)</th>
-            <th>Ücret (₺)</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var hizmet in Model)
-        {
-            <tr>
-                <td>@hizmet.Ad</td>
-                <td>@hizmet.SureDakika</td>
-                <td>@hizmet.Ucret</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="row">
+    @foreach (var hizmet in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100 hizmet-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold">@hizmet.Ad</h5>
+
+                    <p class="card-text text-muted mb-2">
+                        ⏱ Süre: <strong>@hizmet.SureDakika dk</strong>
+                    </p>
+
+                    <p class="card-text mb-3">
+                        💰 Ücret:
+                        <span class="badge bg-success fs-6">
+                            @hizmet.Ucret ₺
+                        </span>
+                    </p>
+
+                    @if (User.Identity!.IsAuthenticated)
+                    {
+                      
+                        <a class="btn btn-primary w-100"
+                           asp-controller="Randevu"
+                           asp-action="AntrenorSec"
+                           asp-route-hizmetId="@hizmet.Id">
+                            Randevu Al
+                        </a>
+
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-secondary w-100"
+                           asp-controller="Account"
+                           asp-action="Login">
+                            Giriş Yap & Randevu Al
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .hizmet-card {
+        border-radius: 12px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .hizmet-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+</style>

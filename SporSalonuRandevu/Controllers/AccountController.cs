@@ -69,6 +69,9 @@ namespace SporSalonuRandevu.Controllers
 
             if (result.Succeeded)
             {
+                // 🔥 EN KRİTİK SATIR
+                await _userManager.AddToRoleAsync(uye, "Uye");
+
                 await _signInManager.SignInAsync(uye, false);
                 return RedirectToAction("Index", "Home");
             }
@@ -77,10 +80,18 @@ namespace SporSalonuRandevu.Controllers
             return View();
         }
 
+
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
+
+
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
     }
 }

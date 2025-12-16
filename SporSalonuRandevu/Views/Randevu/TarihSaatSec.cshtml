@@ -1,0 +1,24 @@
+﻿<input type="date" id="tarih" />
+<select id="saat">
+    <option>10:00</option>
+    <option>11:00</option>
+    <option>12:00</option>
+</select>
+
+<button onclick="kontrolEt()">Kontrol Et</button>
+
+<p id="sonuc"></p>
+
+<script>
+    function kontrolEt() {
+        const tarih = document.getElementById("tarih").value;
+        const saat = document.getElementById("saat").value;
+
+        fetch(`/api/RandevuApi/musait-mi?antrenorId=1&tarih=${tarih}&saat=${saat}`)
+            .then(r => r.json())
+            .then(d => {
+                document.getElementById("sonuc").innerText =
+                    d.musait ? "✅ Müsait" : "❌ Dolu";
+            });
+    }
+</script>

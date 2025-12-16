@@ -116,13 +116,19 @@ namespace SporSalonuRandevu.Controllers
         // =========================
         // EKLE (POST)
         // =========================
+     
         [HttpPost]
         public IActionResult AntrenorEkle(Antrenor antrenor)
         {
+            if (!ModelState.IsValid)
+                return View(antrenor);
+
             _context.Antrenorler.Add(antrenor);
             _context.SaveChanges();
+
             return RedirectToAction("Antrenorler");
         }
+
 
         // =========================
         // GÜNCELLE (GET)
@@ -139,10 +145,15 @@ namespace SporSalonuRandevu.Controllers
         [HttpPost]
         public IActionResult AntrenorGuncelle(Antrenor antrenor)
         {
+            if (!ModelState.IsValid)
+                return View(antrenor);
+
             _context.Antrenorler.Update(antrenor);
             _context.SaveChanges();
+
             return RedirectToAction("Antrenorler");
         }
+
 
         // =========================
         // SİL

@@ -1,31 +1,49 @@
 ﻿@model List<SporSalonuRandevu.Models.Antrenor>
 
-<h2>Antrenörler</h2>
+<h2>Antrenör Yönetimi</h2>
 
-<a class="btn btn-success mb-3" asp-action="AntrenorEkle">Yeni Antrenör</a>
+<div class="mb-3 text-end">
+    <a class="btn btn-success"
+       asp-action="AntrenorEkle">
+        ➕ Antrenör Ekle
+    </a>
+</div>
 
-<table class="table table-bordered">
-    <tr>
-        <th>Ad Soyad</th>
-        <th>Uzmanlık</th>
-        <th>İşlemler</th>
-    </tr>
-
-    @foreach (var a in Model)
-    {
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
         <tr>
-            <td>@a.AdSoyad</td>
-            <td>@a.Uzmanlik</td>
-            <td>
-                <a class="btn btn-warning btn-sm"
-                   asp-action="AntrenorGuncelle"
-                   asp-route-id="@a.Id">Güncelle</a>
-
-                <a class="btn btn-danger btn-sm"
-                   asp-action="AntrenorSil"
-                   asp-route-id="@a.Id"
-                   onclick="return confirm('Silinsin mi?')">Sil</a>
-            </td>
+            <th>Ad Soyad</th>
+            <th>Uzmanlık</th>
+            <th>Çalışma Saatleri</th>
+            <th style="width:180px">İşlemler</th>
         </tr>
-    }
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>@a.AdSoyad</td>
+                <td>@a.Uzmanlik</td>
+                <td>
+                    @a.CalismaBaslangic.ToString(@"hh\:mm")
+                    -
+                    @a.CalismaBitis.ToString(@"hh\:mm")
+                </td>
+                <td>
+                    <a class="btn btn-warning btn-sm"
+                       asp-action="AntrenorGuncelle"
+                       asp-route-id="@a.Id">
+                        Güncelle
+                    </a>
+
+                    <a class="btn btn-danger btn-sm"
+                       asp-action="AntrenorSil"
+                       asp-route-id="@a.Id"
+                       onclick="return confirm('Silmek istiyor musun?')">
+                        Sil
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>

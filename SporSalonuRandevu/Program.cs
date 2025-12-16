@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using SporSalonuRandevu.Data;
 using SporSalonuRandevu.Models;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ===============================
