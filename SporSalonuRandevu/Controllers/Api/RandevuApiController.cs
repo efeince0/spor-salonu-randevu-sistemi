@@ -37,10 +37,16 @@ namespace SporSalonuRandevu.Controllers.Api
 
 
 
-
         [HttpGet("MusaitSaatler")]
         public IActionResult MusaitSaatler(int antrenorId, int hizmetId, DateTime tarih)
         {
+            // 1️⃣ GEÇMİŞ TARİH KONTROLÜ (YENİ)
+            // Eğer seçilen tarih bugünden önceyse direkt boş liste dön.
+            if (tarih.Date < DateTime.Today)
+            {
+                return Ok(new List<string>());
+            }
+
             var antrenor = _context.Antrenorler.FirstOrDefault(a => a.Id == antrenorId);
             var hizmet = _context.Hizmetler.FirstOrDefault(h => h.Id == hizmetId);
 
@@ -50,21 +56,26 @@ namespace SporSalonuRandevu.Controllers.Api
             var calismaBitis = antrenor.CalismaBitis;
             var talepEdilenSure = TimeSpan.FromMinutes(hizmet.SureDakika);
 
-            // --- KRİTİK DÜZELTME BURASI ---
-            // Eğer bitiş saati, başlangıçtan küçük veya eşitse (Örn: Başlangıç 12:00, Bitiş 00:00)
-            // Bitiş saatini 24 saat ileri (bir sonraki gün) olarak ayarla.
-            // Böylece 00:00 saati matematiksel olarak 24:00 olur ve döngü çalışır.
+            // Gece yarısı geçiş düzeltmesi
             if (calismaBitis <= calismaBaslangic)
             {
                 calismaBitis = calismaBitis.Add(TimeSpan.FromDays(1));
             }
-            // -----------------------------
 
             var randevularRaw = _context.Randevular
-                .Include(r => r.Hizmet)
-                .Where(r => r.AntrenorId == antrenorId && r.Tarih.Date == tarih.Date)
-                .Select(r => new { BaslangicString = r.Saat, Sure = r.Hizmet.SureDakika })
-                .ToList();
+               .Include(r => r.Hizmet)
+               .Where(r =>
+                   r.AntrenorId == antrenorId &&
+                   r.Tarih.Date == tarih.Date &&
+                   r.Durum != RandevuDurumu.IptalEdildi   // 🔥 KRİTİK SATIR
+               )
+               .Select(r => new
+               {
+                   BaslangicString = r.Saat,
+                   Sure = r.Hizmet.SureDakika
+               })
+               .ToList();
+
 
             var doluAraliklar = randevularRaw.Select(r => new
             {
@@ -74,24 +85,34 @@ namespace SporSalonuRandevu.Controllers.Api
 
             var uygunSaatler = new List<string>();
 
+            // Şu anki zamanı alıyoruz (Sadece saat kısmı)
+            var suankiAn = DateTime.Now.TimeOfDay;
             for (var suankiSaat = calismaBaslangic;
                  suankiSaat + talepEdilenSure <= calismaBitis;
                  suankiSaat = suankiSaat.Add(TimeSpan.FromHours(1)))
             {
+                // 🔴 BUGÜN GEÇMİŞ SAATLERİ KESİN ENGELLE
+                if (tarih.Date == DateTime.Today)
+                {
+                    var simdi = DateTime.Now.TimeOfDay;
+                    if (suankiSaat.Hours <= simdi.Hours)
+                        continue;
+                }
+
                 var adayBaslangic = suankiSaat;
                 var adayBitis = suankiSaat + talepEdilenSure;
 
                 bool cakismaVar = doluAraliklar.Any(dolu =>
-                    adayBaslangic < dolu.Bitis && adayBitis > dolu.Baslang
+                    adayBaslangic < dolu.Bitis &&
+                    +adayBitis > dolu.Baslang
                 );
 
                 if (!cakismaVar)
                 {
-                    // Saat 24:00 ve üzeriyse (gece yarısını geçtiyse) mod alarak saati düzelt (25:00 -> 01:00 gibi)
-                    // Ama senin durumunda 23:00 en son slot olacağı için normal çalışır.
                     uygunSaatler.Add(suankiSaat.ToString(@"hh\:mm"));
                 }
             }
+
 
             return Ok(uygunSaatler);
         }
@@ -111,8 +132,6 @@ namespace SporSalonuRandevu.Controllers.Api
         [HttpPost("randevu-olustur")]
         public IActionResult RandevuOlustur([FromBody] RandevuEkleModel model)
         {
-            // A) Giriş yapan kullanıcıyı bul (Identity kullanıyorsan)
-            // Eğer User.FindFirst null geliyorsa, giriş yapılmamış demektir.
             var uyeId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(uyeId))
@@ -120,23 +139,37 @@ namespace SporSalonuRandevu.Controllers.Api
                 return Unauthorized(new { mesaj = "Lütfen önce giriş yapınız." });
             }
 
-            // B) Hizmet süresini veya detaylarını kontrol edebilirsin (Opsiyonel)
+            // 1️⃣ GEÇMİŞ TARİH/SAAT ENGELİ (YENİ)
+            // Seçilen tarih bugünden eskiyse HATA VER.
+            if (model.Tarih.Date < DateTime.Today)
+            {
+                return BadRequest("Geçmiş tarihe randevu alınamaz.");
+            }
+
+            // Eğer tarih BUGÜN ise ve saat şu andan eskiyse HATA VER.
+            if (model.Tarih.Date == DateTime.Today)
+            {
+                TimeSpan secilenSaat = TimeSpan.Parse(model.Saat);
+                if (secilenSaat < DateTime.Now.TimeOfDay)
+                {
+                    return BadRequest("Geçmiş saate randevu alınamaz.");
+                }
+            }
+
             var hizmet = _context.Hizmetler.Find(model.HizmetId);
             if (hizmet == null) return BadRequest("Hizmet bulunamadı.");
 
-            // C) Yeni Randevu Nesnesini Oluştur
             var yeniRandevu = new Randevu
             {
                 AntrenorId = model.AntrenorId,
                 HizmetId = model.HizmetId,
-                UyeId = uyeId,        // Giriş yapan üye
+                UyeId = uyeId,
                 Tarih = model.Tarih,
-                Saat = model.Saat,    // Seçilen saat (Örn: "14:00")
-                                      // Eğer tablonda 'OlusturulmaTarihi' gibi bir alan varsa:
-                                      // CreatedDate = DateTime.Now 
+                Saat = model.Saat,
+                Durum = RandevuDurumu.Beklemede
             };
 
-            // D) Veritabanına Ekle ve Kaydet
+
             _context.Randevular.Add(yeniRandevu);
             _context.SaveChanges();
 

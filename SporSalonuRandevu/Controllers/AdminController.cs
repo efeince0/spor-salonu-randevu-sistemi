@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SporSalonuRandevu.Data;
 using SporSalonuRandevu.Models;
+using static SporSalonuRandevu.Models.Randevu;
 
 namespace SporSalonuRandevu.Controllers
 {
@@ -116,7 +118,7 @@ namespace SporSalonuRandevu.Controllers
         // =========================
         // EKLE (POST)
         // =========================
-     
+
         [HttpPost]
         public IActionResult AntrenorEkle(Antrenor antrenor)
         {
@@ -165,5 +167,72 @@ namespace SporSalonuRandevu.Controllers
             _context.SaveChanges();
             return RedirectToAction("Antrenorler");
         }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult RandevuYonetimi()
+        {
+            var randevular = _context.Randevular
+                .Include(r => r.Antrenor)
+                .Include(r => r.Hizmet)
+                .Include(r => r.Uye)
+                .OrderByDescending(r => r.Tarih)
+                .ToList();
+
+            return View(randevular);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult RandevuOnayla(int id)
+        {
+            var randevu = _context.Randevular
+                .Include(r => r.Hizmet)
+                .FirstOrDefault(r => r.Id == id);
+
+            if (randevu == null)
+                return NotFound();
+
+            randevu.Durum = RandevuDurumu.Onaylandi;
+
+            // 🔔 BİLDİRİM OLUŞTUR
+            _context.Bildirimler.Add(new Bildirim
+            {
+                UyeId = randevu.UyeId,
+                Mesaj = $"✅ {randevu.Tarih:dd.MM.yyyy} tarihli {randevu.Saat} saatli " +
+                        $"{randevu.Hizmet.Ad} randevunuz ONAYLANDI."
+            });
+
+            _context.SaveChanges();
+
+            return RedirectToAction("RandevuYonetimi");
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult RandevuIptal(int id)
+        {
+            var randevu = _context.Randevular
+                .Include(r => r.Hizmet)
+                .FirstOrDefault(r => r.Id == id);
+
+            if (randevu == null)
+                return NotFound();
+
+            randevu.Durum = RandevuDurumu.IptalEdildi;
+
+            // 🔔 BİLDİRİM OLUŞTUR
+            _context.Bildirimler.Add(new Bildirim
+            {
+                UyeId = randevu.UyeId,
+                Mesaj = $"❌ {randevu.Tarih:dd.MM.yyyy} tarihli {randevu.Saat} saatli " +
+                        $"{randevu.Hizmet.Ad} randevunuz İPTAL EDİLDİ."
+            });
+
+            _context.SaveChanges();
+
+            return RedirectToAction("RandevuYonetimi");
+        }
+
+
+
+
     }
 }

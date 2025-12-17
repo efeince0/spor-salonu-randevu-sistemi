@@ -1,0 +1,67 @@
+﻿@model List<Bildirim>
+
+<div class="bildirim-wrapper">
+    <h3 class="mb-4">🔔 Bildirimler</h3>
+
+    @if (!Model.Any())
+    {
+        <div class="bildirim-bos">
+            Henüz bildiriminiz yok.
+        </div>
+    }
+    else
+    {
+        <div class="bildirim-list">
+            @foreach (var b in Model)
+            {
+                var durumClass = b.Mesaj.Contains("ONAYLANDI")
+                ? "onay"
+                : b.Mesaj.Contains("İPTAL")
+                ? "iptal"
+                : "";
+
+                <div class="bildirim-item @(durumClass) @(b.OkunduMu ? "" : "okunmamis")">
+
+                    <!-- ICON -->
+                    <div class="bildirim-icon">
+                        @if (b.Mesaj.Contains("ONAYLANDI"))
+                        {
+                            <span>✅</span>
+                        }
+                        else if (b.Mesaj.Contains("İPTAL"))
+                        {
+                            <span>❌</span>
+                        }
+                        else
+                        {
+                            <span>🔔</span>
+                        }
+                    </div>
+
+                    <!-- CONTENT -->
+                    <div class="bildirim-content">
+                        <div class="bildirim-metin">
+                            @b.Mesaj
+                        </div>
+
+                        <div class="bildirim-tarih">
+                            @b.OlusturmaTarihi.ToString("dd.MM.yyyy HH:mm")
+                        </div>
+                    </div>
+
+                    <!-- OKUNDU BUTONU -->
+                    @if (!b.OkunduMu)
+                    {
+                        <div>
+                            <a asp-action="BildirimOkundu"
+                               asp-route-id="@b.Id"
+                               class="btn btn-sm btn-outline-primary">
+                                Okundu
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

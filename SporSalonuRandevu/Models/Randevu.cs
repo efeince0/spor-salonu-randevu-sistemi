@@ -1,5 +1,13 @@
 ﻿namespace SporSalonuRandevu.Models
 {
+
+
+    public enum RandevuDurumu
+    {
+        Beklemede = 0,
+        Onaylandi = 1,
+        IptalEdildi = 2
+    }
     public class Randevu
     {
         public int Id { get; set; }
@@ -15,5 +23,9 @@
 
         public int AntrenorId { get; set; }
         public Antrenor Antrenor { get; set; } = null!;
+        public RandevuDurumu Durum { get; set; }
+
+      
+
     }
 }

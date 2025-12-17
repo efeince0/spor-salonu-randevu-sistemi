@@ -1,0 +1,68 @@
+﻿@model List<Randevu>
+@using SporSalonuRandevu.Models
+
+<h3>Randevularım</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Antrenör</th>
+            <th>Hizmet</th>
+            <th>Tarih</th>
+            <th>Saat</th>
+            <th>Durum</th>
+            <th>İşlem</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td>@r.Antrenor.AdSoyad</td>
+                <td>@r.Hizmet.Ad</td>
+                <td>@r.Tarih.ToShortDateString()</td>
+                <td>@r.Saat</td>
+                <td>
+                    @if (r.Durum == RandevuDurumu.Beklemede)
+                    {
+                        <span class="badge bg-warning">Beklemede</span>
+                    }
+                    else if (r.Durum == RandevuDurumu.Onaylandi)
+                    {
+                        <span class="badge bg-success">Onaylandı</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">İptal</span>
+                    }
+                </td>
+                <td>
+                    @if (r.Durum == RandevuDurumu.Beklemede)
+                    {
+                        <a asp-action="RandevuGuncelle"
+                           asp-route-id="@r.Id"
+                           class="btn btn-warning btn-sm me-1">
+                            Güncelle
+                        </a>
+
+                        <a asp-action="RandevuIptal"
+                           asp-route-id="@r.Id"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Bu randevu iptal edilecektir ve geri alınamaz. Emin misiniz?');">
+                            İptal
+                        </a>
+                    }
+                    else if (r.Durum == RandevuDurumu.Onaylandi)
+                    {
+                        <a asp-action="RandevuIptal"
+                           asp-route-id="@r.Id"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Bu randevu iptal edilecektir ve geri alınamaz. Emin misiniz?');">
+                            İptal
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

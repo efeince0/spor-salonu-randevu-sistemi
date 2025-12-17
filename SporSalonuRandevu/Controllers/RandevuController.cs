@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SporSalonuRandevu.Data;
+using SporSalonuRandevu.Models;
+using System.Security.Claims;
 
 namespace SporSalonuRandevu.Controllers
 {
@@ -94,6 +96,7 @@ namespace SporSalonuRandevu.Controllers
             return View();
         }
 
+      
 
 
 

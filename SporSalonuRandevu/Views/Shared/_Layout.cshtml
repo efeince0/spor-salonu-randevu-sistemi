@@ -1,92 +1,105 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@inject SporSalonuRandevu.Data.UygulamaDbContext _context
+
+@{
+    var uyeId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var okunmamisSayisi = uyeId == null
+        ? 0
+        : _context.Bildirimler.Count(b => b.UyeId == uyeId && !b.OkunduMu);
+}
+
+<!DOCTYPE html>
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SporSalonuRandevu</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/SporSalonuRandevu.styles.css" asp-append-version="true" />
 </head>
+
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SporSalonuRandevu</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
+    <div class="app-layout">
 
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+        <!-- ================= SIDEBAR ================= -->
+        <aside class="sidebar">
 
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Hizmet" asp-action="Index">
-                                Hizmetler
-                            </a>
-                        </li>
-                    </ul>
-
-                    <ul class="navbar-nav ms-auto">
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
-                        {
-                            @* Admin ise Admin Paneli *@
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-warning" asp-controller="Admin" asp-action="Index">
-                                        Admin Paneli
-                                    </a>
-                                </li>
-                            }
-
-                            <li class="nav-item">
-                                <a class="nav-link text-danger" asp-controller="Account" asp-action="Logout">
-                                    Çıkış Yap
-                                </a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">
-                                    Giriş
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Register">
-                                    Kayıt Ol
-                                </a>
-                            </li>
-                        }
-                    </ul>
-
-                </div>
+            <!-- LOGO -->
+            <div class="sidebar-logo">
+                🏋️ <span>SporSalonu</span>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+            <!-- MENÜ -->
+            <nav class="sidebar-nav">
+                <a asp-controller="Home" asp-action="Index" class="nav-item">
+                    🏠 <span>Ana Sayfa</span>
+                </a>
+
+                <a asp-controller="Hizmet" asp-action="Index" class="nav-item">
+                    💪 <span>Hizmetler</span>
+                </a>
+
+                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Uye"))
+                {
+                    <a asp-controller="Profil" asp-action="Randevularim" class="nav-item">
+                        📅 <span>Randevularım</span>
+                    </a>
+                }
+
+                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Admin" asp-action="Index" class="nav-item admin">
+                        ⚙️ <span>Admin Paneli</span>
+                    </a>
+                }
+            </nav>
+
+            <!-- ALT AUTH / PROFİL -->
+            <div class="sidebar-footer">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Profil" asp-action="Bilgilerim" class="nav-item small">
+                        👤 Profilim
+                    </a>
+
+                    <a asp-controller="Profil"
+                       asp-action="Bildirimler"
+                       class="nav-item position-relative">
+                        🔔 <span>Bildirimler</span>
+
+                        @if (okunmamisSayisi > 0)
+                        {
+                            <span class="badge bg-danger position-absolute top-0 end-0 translate-middle">
+                                @okunmamisSayisi
+                            </span>
+                        }
+                    </a>
+
+                    <a asp-controller="Account" asp-action="Logout" class="nav-item logout">
+                        🚪 Çıkış Yap
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="nav-item">
+                        🔐 Giriş Yap
+                    </a>
+
+                    <a asp-controller="Account" asp-action="Register" class="nav-item register">
+                        📝 Kayıt Ol
+                    </a>
+                }
+            </div>
+        </aside>
+
+        <!-- ================= CONTENT ================= -->
+        <main class="content">
             @RenderBody()
         </main>
+
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - SporSalonuRandevu - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

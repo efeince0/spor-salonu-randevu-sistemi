@@ -1,0 +1,66 @@
+﻿@model Uye
+@{
+    ViewData["Title"] = "Bilgilerim";
+}
+
+<div class="profile-page">
+
+    <h3 class="mb-4">👤 Profil Bilgilerim</h3>
+
+    <div class="profile-card">
+        <form method="post">
+
+            <div class="mb-3">
+                <label class="form-label">Ad Soyad</label>
+                <input type="text"
+                       name="adSoyad"
+                       class="form-control"
+                       value="@Model.AdSoyad"
+                       required />
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Yaş</label>
+                    <input type="number"
+                           name="yas"
+                           class="form-control"
+                           min="10"
+                           max="100"
+                           value="@Model.Yas" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Boy (cm)</label>
+                    <input type="number"
+                           name="boy"
+                           class="form-control"
+                           min="120"
+                           max="230"
+                           value="@Model.Boy" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Kilo (kg)</label>
+                    <input type="number"
+                           name="kilo"
+                           class="form-control"
+                           min="30"
+                           max="200"
+                           value="@Model.Kilo" />
+                </div>
+            </div>
+
+            <button class="btn btn-primary px-4">
+                Güncelle
+            </button>
+        </form>
+
+        @if (ViewBag.Mesaj != null)
+        {
+            <div class="alert alert-success mt-4">
+                @ViewBag.Mesaj
+            </div>
+        }
+    </div>
+</div>

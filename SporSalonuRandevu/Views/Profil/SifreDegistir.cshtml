@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Şifre Değiştir";
+}
+
+<h3>Şifre Değiştir</h3>
+
+<form method="post" class="mt-3">
+    <div class="mb-2">
+        <label>Eski Şifre</label>
+        <input type="password" name="eskiSifre" class="form-control" required />
+    </div>
+
+    <div class="mb-2">
+        <label>Yeni Şifre</label>
+        <input type="password" name="yeniSifre" class="form-control" required />
+    </div>
+
+    <button class="btn btn-warning mt-2">Şifreyi Güncelle</button>
+</form>
+
+@if (ViewBag.Mesaj != null)
+{
+    <div class="alert alert-success mt-3">@ViewBag.Mesaj</div>
+}
+@if (ViewBag.Hata != null)
+{
+    <div class="alert alert-danger mt-3">@ViewBag.Hata</div>
+}

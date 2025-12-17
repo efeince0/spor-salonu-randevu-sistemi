@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SporSalonuRandevu.Data;
@@ -11,9 +12,11 @@ using SporSalonuRandevu.Data;
 namespace SporSalonuRandevu.Migrations
 {
     [DbContext(typeof(UygulamaDbContext))]
-    partial class UygulamaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251216213420_RandevuDurumEkle")]
+    partial class RandevuDurumEkle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -179,35 +182,6 @@ namespace SporSalonuRandevu.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Antrenorler");
-                });
-
-            modelBuilder.Entity("SporSalonuRandevu.Models.Bildirim", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Mesaj")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("OkunduMu")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("OlusturmaTarihi")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("UyeId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UyeId");
-
-                    b.ToTable("Bildirimler");
                 });
 
             modelBuilder.Entity("SporSalonuRandevu.Models.Hizmet", b =>
@@ -397,17 +371,6 @@ namespace SporSalonuRandevu.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("SporSalonuRandevu.Models.Bildirim", b =>
-                {
-                    b.HasOne("SporSalonuRandevu.Models.Uye", "Uye")
-                        .WithMany()
-                        .HasForeignKey("UyeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Uye");
                 });
 
             modelBuilder.Entity("SporSalonuRandevu.Models.Randevu", b =>

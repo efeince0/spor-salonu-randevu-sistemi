@@ -1,0 +1,121 @@
+﻿@model Randevu
+@using SporSalonuRandevu.Models
+
+@{
+    ViewData["Title"] = "Randevu Saatini Güncelle";
+
+    var randevuDateTime = Model.Tarih.Date + TimeSpan.Parse(Model.Saat);
+    var kalanSaat = (randevuDateTime - DateTime.Now).TotalHours;
+}
+
+<h3>Randevu Saatini Güncelle</h3>
+
+<p class="text-muted mb-3">
+    Mevcut Saat: <strong>@Model.Saat</strong><br />
+    Mevcut Tarih: <strong>@Model.Tarih.ToShortDateString()</strong>
+</p>
+
+@if (kalanSaat < 6)
+{
+    <div class="alert alert-warning">
+        Bu randevuya <strong>6 saatten az</strong> kaldığı için güncelleme yapılamaz.
+        <br />
+        İstersen randevuyu iptal edebilirsin.
+    </div>
+}
+else
+{
+    <div class="card p-4 shadow-sm">
+        <div class="mb-3">
+            <label class="form-label">Yeni Tarih Seç</label>
+            <input type="date"
+                   id="tarihInput"
+                   class="form-control"
+                   value="@Model.Tarih.ToString("yyyy-MM-dd")"
+                   min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Yeni Saat Seç</label>
+            <div id="saatler" class="d-flex flex-wrap gap-2">
+                <!-- Saatler JS ile yüklenecek -->
+            </div>
+        </div>
+
+        <form method="post" id="guncelleForm">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" name="tarih" id="secilenTarih" />
+            <input type="hidden" name="saat" id="secilenSaat" />
+
+            <button type="submit" class="btn btn-success" disabled id="kaydetBtn">
+                Kaydet
+            </button>
+
+            <a asp-action="Randevularim" class="btn btn-secondary ms-2">
+                Vazgeç
+            </a>
+        </form>
+    </div>
+}
+
+@section Scripts {
+    @if (kalanSaat >= 6)
+    {
+        <script>
+            const mevcutSaat = "@Model.Saat";
+            const antrenorId = @Model.AntrenorId;
+            const hizmetId = @Model.HizmetId;
+
+            const tarihInput = document.getElementById("tarihInput");
+            const saatlerDiv = document.getElementById("saatler");
+            const secilenSaatInput = document.getElementById("secilenSaat");
+            const secilenTarihInput = document.getElementById("secilenTarih");
+            const kaydetBtn = document.getElementById("kaydetBtn");
+
+            function saatleriGetir(tarih) {
+                saatlerDiv.innerHTML = "";
+                kaydetBtn.disabled = true;
+                secilenSaatInput.value = "";
+
+                fetch(`/api/RandevuApi/MusaitSaatler?antrenorId=${antrenorId}&hizmetId=${hizmetId}&tarih=${tarih}`)
+                    .then(res => res.json())
+                    .then(saatler => {
+                        saatler
+                            .filter(s => s !== mevcutSaat) // mevcut saat ASLA listelenmez
+                            .forEach(saat => {
+                                const btn = document.createElement("button");
+                                btn.type = "button";
+                                btn.className = "btn btn-outline-primary";
+                                btn.innerText = saat;
+
+                                btn.onclick = () => {
+                                    document.querySelectorAll("#saatler button")
+                                        .forEach(b => b.classList.remove("active"));
+
+                                    btn.classList.add("active");
+
+                                    secilenSaatInput.value = saat;
+                                    secilenTarihInput.value = tarih;
+                                    kaydetBtn.disabled = false;
+                                };
+
+                                saatlerDiv.appendChild(btn);
+                            });
+
+                        if (saatlerDiv.children.length === 0) {
+                            saatlerDiv.innerHTML =
+                                `<span class="text-muted">Bu tarih için uygun saat yok.</span>`;
+                        }
+                    });
+            }
+
+            // İlk yükleme
+            saatleriGetir(tarihInput.value);
+
+            // Tarih değişince yeniden çek
+            tarihInput.addEventListener("change", () => {
+                saatleriGetir(tarihInput.value);
+            });
+        </script>
+    }
+}

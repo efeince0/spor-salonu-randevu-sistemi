@@ -14,5 +14,7 @@ namespace SporSalonuRandevu.Data
         public DbSet<Hizmet> Hizmetler { get; set; }
         public DbSet<Antrenor> Antrenorler { get; set; }
         public DbSet<Randevu> Randevular { get; set; }
+        public DbSet<Bildirim> Bildirimler { get; set; }
+
     }
 }

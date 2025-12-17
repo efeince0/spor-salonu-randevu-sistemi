@@ -7,6 +7,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Include="Views\Profil\Bilgilerim.cshtml" />
+	  <None Include="Views\Profil\Index.cshtml" />
+	  <None Include="Views\Profil\Randevularim.cshtml" />
+	  <None Include="Views\Profil\SifreDegistir.cshtml" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.6" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6">
 			<PrivateAssets>all</PrivateAssets>

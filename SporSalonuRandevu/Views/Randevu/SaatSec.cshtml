@@ -2,35 +2,40 @@
     ViewData["Title"] = "Saat Seç";
 }
 
-<div class="container mt-5">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h3 class="card-title mb-0">Randevu Saati Belirle</h3>
+<div class="form-page">
+    <div class="form-card wide">
+
+        <h3 class="mb-4">Randevu Saati Belirle</h3>
+
+        <!-- TARİH -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Tarih Seçiniz</label>
+            <input type="date" id="tarih" class="form-control" />
         </div>
-        <div class="card-body">
 
-            <div class="mb-4">
-                <label class="form-label fw-bold">Tarih Seçiniz:</label>
-                <input type="date" id="tarih" class="form-control form-control-lg" />
+        <!-- SAATLER -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Müsait Saatler</label>
+
+            <div id="saatler" class="saat-grid">
+                <span class="text-muted fst-italic">
+                    Lütfen önce tarih seçiniz.
+                </span>
             </div>
-
-            <div class="mb-4">
-                <label class="form-label fw-bold">Müsait Saatler:</label>
-                <div id="saatler" class="d-flex flex-wrap gap-2">
-                    <span class="text-muted fst-italic">Lütfen önce tarih seçiniz.</span>
-                </div>
-            </div>
-
-            <div id="onayKutusu" style="display:none;" class="mt-4 pt-3 border-top">
-                <p class="text-success fw-bold" id="secilenSaatBilgi"></p>
-                <button id="btnKaydet" class="btn btn-success btn-lg w-100">
-                    Randevuyu Onayla ve Bitir
-                </button>
-            </div>
-
         </div>
+
+        <!-- ONAY -->
+        <div id="onayKutusu" class="onay-box" style="display:none;">
+            <p class="text-success fw-semibold mb-3" id="secilenSaatBilgi"></p>
+
+            <button id="btnKaydet" class="btn btn-primary w-100">
+                Randevuyu Onayla
+            </button>
+        </div>
+
     </div>
 </div>
+
 
 <script>
     // Controller'dan gelen ID'leri alıyoruz
@@ -128,7 +133,7 @@
         })
             .then(res => {
                 if (res.ok) {
-                    alert("Randevunuz başarıyla oluşturuldu!");
+                    alert("Randevunuz oluşturuldu ve onay beklemektedir. Onaylandığında randevularım sayfasında görünecektir.");
                     window.location.href = "/"; // Anasayfaya yönlendir
                 } else if (res.status === 401) {
                     alert("Randevu almak için giriş yapmalısınız!");
