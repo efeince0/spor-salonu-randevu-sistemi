@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SporSalonuRandevu.Data;
 using SporSalonuRandevu.Models;
+using SporSalonuRandevu.Services;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -18,7 +19,7 @@ builder.Services.AddDbContext<UygulamaDbContext>(options =>
 // ===============================
 builder.Services.AddIdentity<Uye, IdentityRole>(options =>
 {
-    // 🔥 ŞİFRE KURALLARINI KALDIRDIK
+    // 🔥 ŞİFRE KURALLARI (Geliştirme ortamı için basitleştirilmiş)
     options.Password.RequireDigit = false;
     options.Password.RequireLowercase = false;
     options.Password.RequireUppercase = false;
@@ -31,9 +32,25 @@ builder.Services.AddIdentity<Uye, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 // ===============================
-// MVC
+// MVC & SESSION (BURASI EKLENDİ)
 // ===============================
 builder.Services.AddControllersWithViews();
+
+// 🟢 1. SESSION SERVİSİ EKLENDİ (Diyet listesi hafızada kalsın diye)
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // 30 dakika hafızada tutar
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// 🟢 2. HTTP CLIENT TIMEOUT AYARI (Uzun süren AI cevapları için)
+builder.Services.AddHttpClient<GeminiService>(client =>
+{
+    // Varsayılan 100 saniyedir, AI bazen uzun düşünür, bunu 5 dk yaptık.
+    client.Timeout = TimeSpan.FromMinutes(5);
+});
+
 
 var app = builder.Build();
 
@@ -50,6 +67,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// 🟢 3. SESSION MIDDLEWARE EKLENDİ (Authentication'dan önce olmalı)
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,0 +1,103 @@
+﻿@model SporSalonuRandevu.Models.Uye
+
+@{
+    ViewData["Title"] = "AI Diyet & Egzersiz Planı";
+}
+
+<div class="container mt-5">
+
+    <div class="row mb-4">
+        <div class="col-md-12 text-center">
+            <h2 class="text-white">🤖 AI Kişisel Koçun</h2>
+            <p class="text-muted">Senin verilerine özel, haftalık beslenme ve antrenman planı.</p>
+        </div>
+    </div>
+
+    <div class="card bg-dark text-white shadow-lg border-secondary mb-5">
+        <div class="card-header border-secondary">
+            <h5 class="mb-0">📏 Vücut Bilgilerin ve Hedefin</h5>
+        </div>
+        <div class="card-body">
+
+            @if (ViewBag.Hata != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Hata</div>
+            }
+
+            <form asp-action="DiyetEgzersiz" method="post" onsubmit="startLoading()">
+
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label text-muted">Mevcut Kilo (kg)</label>
+                        <input type="text" class="form-control bg-secondary text-white border-0" value="@Model.Kilo" disabled>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted">Boy (cm)</label>
+                        <input type="text" class="form-control bg-secondary text-white border-0" value="@Model.Boy" disabled>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted">Yaş</label>
+                        <input type="text" class="form-control bg-secondary text-white border-0" value="@Model.Yas" disabled>
+                    </div>
+
+                    <div class="col-md-12 mt-4">
+                        <label class="form-label fw-bold text-warning">🎯 Hedef Kilo (kg)</label>
+                        <input type="number" name="hedefKilo" class="form-control form-control-lg" placeholder="Örn: 80" required>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold text-info">📝 Özel Durumlar / Notlar (Opsiyonel)</label>
+                        <textarea name="ekNotlar" class="form-control" rows="3"
+                                  placeholder="Örn: Glüten alerjim var, bel fıtığım var, vejeteryanım, sadece evde spor yapabilirim..."></textarea>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" id="aiSubmitBtn" class="btn btn-primary btn-lg">
+                        🚀 AI ile Haftalık Plan Oluştur
+                    </button>
+
+                </div>
+            </form>
+            <div id="loadingBox" class="alert alert-info text-center mt-4 d-none">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <h6 class="mb-1">🤖 Programınız oluşturuluyor</h6>
+                <small>Lütfen bekleyiniz, bu işlem birkaç saniye sürebilir...</small>
+            </div>
+
+        </div>
+    </div>
+
+    @if (ViewBag.Plan != null)
+    {
+        <div class="card bg-dark text-white shadow-lg border-secondary animate__animated animate__fadeIn">
+            <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 text-success">📋 Hazırlanan Planın</h4>
+                <a href="/Ai/PlaniTemizle" class="btn btn-outline-danger btn-sm">
+                    🗑️ Planı Sıfırla
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    @Html.Raw(ViewBag.Plan)
+                </div>
+            </div>
+            <div class="card-footer border-secondary text-muted text-center">
+                <small>⚠️ Bu plan yapay zeka tarafından öneri amaçlı oluşturulmuştur. Uygulamadan önce doktorunuza danışınız.</small>
+            </div>
+        </div>
+    }
+
+</div>
+
+<script>
+    function startLoading() {
+        const btn = document.getElementById("aiSubmitBtn");
+        const loading = document.getElementById("loadingBox");
+
+        btn.disabled = true;
+        btn.innerHTML = "⏳ Lütfen Bekleyiniz...";
+        loading.classList.remove("d-none");
+    }
+</script>

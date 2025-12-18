@@ -1,8 +1,73 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Ana Sayfa";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="home-hero">
+    <h1>🏋️ SporSalonu Randevu Sistemi</h1>
+    <p>
+        Kişisel hedeflerine uygun <strong>antrenör randevuları</strong>,
+        <strong>AI destekli diyet & egzersiz planları</strong> ve
+        modern bir spor salonu deneyimi.
+    </p>
+
+    <div class="hero-buttons">
+        <a asp-controller="Hizmet" asp-action="Index" class="btn btn-primary btn-lg">
+            💪 Hizmetleri İncele
+        </a>
+
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            <a asp-controller="Ai" asp-action="DiyetEgzersiz" class="btn btn-outline-primary btn-lg">
+                🤖 AI Diyet & Egzersiz
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-lg">
+                🔐 Giriş Yap
+            </a>
+        }
+    </div>
+</div>
+
+<!-- ====== ÖZELLİKLER ====== -->
+<div class="home-features">
+
+    <div class="feature-card">
+        <h3>📅 Online Randevu</h3>
+        <p>
+            Antrenör, hizmet, tarih ve saat seçerek
+            randevunu saniyeler içinde oluştur.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <h3>🤖 AI Destekli Plan</h3>
+        <p>
+            Boy, kilo, yaş ve hedef kilona göre
+            haftalık diyet & egzersiz planı al.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <h3>🔔 Bildirim Sistemi</h3>
+        <p>
+            Randevun onaylandığında veya iptal edildiğinde
+            anında bildirim al.
+        </p>
+    </div>
+
+</div>
+
+<!-- ====== ALT ÇAĞRI ====== -->
+<div class="home-cta">
+    <h2>Hedefine Ulaşmaya Bugün Başla 💥</h2>
+    <p>
+        Profesyonel antrenörler ve yapay zeka destekli planlarla
+        maksimum verim al.
+    </p>
+
+    <a asp-controller="Hizmet" asp-action="Index" class="btn btn-success btn-lg">
+        🚀 Randevu Al
+    </a>
 </div>

@@ -39,6 +39,11 @@
                     💪 <span>Hizmetler</span>
                 </a>
 
+                <a asp-controller="Ai" asp-action="DiyetEgzersiz" class="nav-item">
+                    🤖 AI Diyet & Egzersiz
+                </a>
+
+
                 @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Uye"))
                 {
                     <a asp-controller="Profil" asp-action="Randevularim" class="nav-item">
