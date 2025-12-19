@@ -660,3 +660,127 @@ h3 {
     min-height: 100vh;
     background: radial-gradient(circle at top, #020617, #020617);
 }
+
+.stat-card {
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px;
+    padding: 20px;
+    min-width: 260px;
+}
+
+.stat-title {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+    .stat-value .currency {
+        font-size: 20px;
+        opacity: 0.85;
+    }
+
+.stat-desc {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #aaa;
+}
+
+.stat-card.warning {
+    border: 1px solid #f1c40f;
+}
+
+/* ===================================================
+   ADMIN DASHBOARD – KURUMSAL OVERRIDE
+=================================================== */
+
+/* KART GENEL */
+.stat-card {
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(148,163,184,0.15);
+    box-shadow: none;
+}
+
+/* BAŞLIK */
+.stat-title {
+    color: #9ca3af;
+    letter-spacing: .2px;
+}
+
+/* SAYI */
+.stat-value {
+    font-size: 30px;
+    font-weight: 600;
+}
+
+    /* PARA */
+    .stat-value .currency {
+        font-size: 18px;
+        opacity: .6;
+    }
+
+/* AÇIKLAMA */
+.stat-desc {
+    color: #94a3b8;
+}
+
+/* ---------------------------------------------------
+   RENKLERİ YUMUŞAT
+--------------------------------------------------- */
+
+/* MAVİ */
+.stat-card.primary {
+    border-color: rgba(59,130,246,.25);
+}
+
+/* YEŞİL */
+.stat-card.success {
+    border-color: rgba(34,197,94,.25);
+}
+
+/* SARI (ÇOK KIS) */
+.stat-card.warning {
+    border-color: rgba(245,158,11,.25);
+}
+
+/* INFO */
+.stat-card.info {
+    border-color: rgba(20,184,166,.25);
+}
+
+/* ---------------------------------------------------
+   BÜYÜK BLOKLAR (ONAY / BEKLEYEN)
+--------------------------------------------------- */
+
+.stat-card.large {
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* ONAYLANAN */
+.stat-card.onay {
+    border-color: rgba(34,197,94,.25);
+}
+
+    .stat-card.onay .stat-value {
+        color: #86efac;
+    }
+
+/* BEKLEYEN */
+.stat-card.bekleyen {
+    border-color: rgba(245,158,11,.25);
+}
+
+    .stat-card.bekleyen .stat-value {
+        color: #fde68a;
+    }

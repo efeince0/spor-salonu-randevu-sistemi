@@ -54,7 +54,15 @@
             <button class="btn btn-primary px-4">
                 Güncelle
             </button>
+
+
         </form>
+
+        <a asp-controller="Profil"
+           asp-action="SifreDegistir"
+           class="btn btn-outline-warning">
+            🔒 Şifre Değiştir
+        </a>
 
         @if (ViewBag.Mesaj != null)
         {

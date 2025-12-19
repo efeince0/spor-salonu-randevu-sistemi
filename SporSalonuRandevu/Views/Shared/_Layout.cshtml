@@ -2,9 +2,11 @@
 
 @{
     var uyeId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-    var okunmamisSayisi = uyeId == null
-        ? 0
-        : _context.Bildirimler.Count(b => b.UyeId == uyeId && !b.OkunduMu);
+
+    var okunmamisSayisi =
+        User.Identity?.IsAuthenticated == true && User.IsInRole("Uye") && uyeId != null
+        ? _context.Bildirimler.Count(b => b.UyeId == uyeId && !b.OkunduMu)
+        : 0;
 }
 
 <!DOCTYPE html>
@@ -29,56 +31,84 @@
                 🏋️ <span>SporSalonu</span>
             </div>
 
-            <!-- MENÜ -->
+            <!-- ================= MENÜ ================= -->
             <nav class="sidebar-nav">
-                <a asp-controller="Home" asp-action="Index" class="nav-item">
-                    🏠 <span>Ana Sayfa</span>
-                </a>
 
-                <a asp-controller="Hizmet" asp-action="Index" class="nav-item">
-                    💪 <span>Hizmetler</span>
-                </a>
+                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                {
+                    <nav class="sidebar-nav">
 
-                <a asp-controller="Ai" asp-action="DiyetEgzersiz" class="nav-item">
-                    🤖 AI Diyet & Egzersiz
-                </a>
+                        <!-- DASHBOARD -->
+                        <a asp-controller="Admin" asp-action="Index" class="nav-item">
+                            ⚙️ <span>Dashboard</span>
+                        </a>
+
+                        <!-- RANDEVU -->
+                        <a asp-controller="Admin" asp-action="RandevuYonetimi" class="nav-item">
+                            📅 <span>Randevu Yönetimi</span>
+                        </a>
+
+                        <!-- HİZMET -->
+                        <a asp-controller="Admin" asp-action="Hizmetler" class="nav-item">
+                            💪 <span>Hizmet Yönetimi</span>
+                        </a>
+
+                        <!-- ANTRENÖR -->
+                        <a asp-controller="Admin" asp-action="Antrenorler" class="nav-item">
+                            🧑‍🏫 <span>Antrenör Yönetimi</span>
+                        </a>
+
+                    </nav>
+                }
 
 
+
+                @* ========== UYE MENÜ ========== *@
                 @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Uye"))
                 {
+                    <a asp-controller="Home" asp-action="Index" class="nav-item">
+                        🏠 <span>Ana Sayfa</span>
+                    </a>
+
+                    <a asp-controller="Hizmet" asp-action="Index" class="nav-item">
+                        💪 <span>Hizmetler</span>
+                    </a>
+
+                    <a asp-controller="Ai" asp-action="DiyetEgzersiz" class="nav-item">
+                        🤖 <span>AI Diyet & Egzersiz</span>
+                    </a>
+
                     <a asp-controller="Profil" asp-action="Randevularim" class="nav-item">
                         📅 <span>Randevularım</span>
                     </a>
                 }
-
-                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
-                {
-                    <a asp-controller="Admin" asp-action="Index" class="nav-item admin">
-                        ⚙️ <span>Admin Paneli</span>
-                    </a>
-                }
             </nav>
 
-            <!-- ALT AUTH / PROFİL -->
+            <!-- ================= FOOTER ================= -->
             <div class="sidebar-footer">
+
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <a asp-controller="Profil" asp-action="Bilgilerim" class="nav-item small">
-                        👤 Profilim
-                    </a>
+                    @* SADECE UYE *@
+                    @if (User.IsInRole("Uye"))
+                    {
+                        <a asp-controller="Profil" asp-action="Bilgilerim" class="nav-item small">
+                            👤 Profilim
+                        </a>
 
-                    <a asp-controller="Profil"
-                       asp-action="Bildirimler"
-                       class="nav-item position-relative">
-                        🔔 <span>Bildirimler</span>
+                        <a asp-controller="Profil"
+                           asp-action="Bildirimler"
+                           class="nav-item position-relative">
+                            🔔 <span>Bildirimler</span>
 
-                        @if (okunmamisSayisi > 0)
-                        {
-                            <span class="badge bg-danger position-absolute top-0 end-0 translate-middle">
-                                @okunmamisSayisi
-                            </span>
-                        }
-                    </a>
+                            @if (okunmamisSayisi > 0)
+                            {
+                                <span class="badge bg-danger position-absolute top-0 end-0 translate-middle">
+                                    @okunmamisSayisi
+                                </span>
+                            }
+                        </a>
+                    }
 
                     <a asp-controller="Account" asp-action="Logout" class="nav-item logout">
                         🚪 Çıkış Yap

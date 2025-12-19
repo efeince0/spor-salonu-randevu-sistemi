@@ -2,34 +2,86 @@
     ViewData["Title"] = "Admin Paneli";
 }
 
-<h2>Admin Paneli</h2>
-<p>Sistem genel durumu</p>
+<div class="mb-4">
+    <h2 class="text-white">⚙️ Admin Paneli</h2>
+    <p class="text-muted">Sistem genel durumu ve özet rapor</p>
+</div>
 
-<div class="row mt-4">
+<!-- İSTATİSTİK KARTLARI -->
+<div class="row g-4">
 
-    <div class="col-md-4">
-        <div class="card text-center border-primary">
+    <div class="col-md-3">
+        <div class="card text-center border-primary bg-dark text-white">
             <div class="card-body">
-                <h5 class="card-title">Toplam Hizmet</h5>
-                <h3>@ViewBag.HizmetSayisi</h3>
+                <h6 class="text-muted">Toplam Hizmet</h6>
+                <h2>@ViewBag.HizmetSayisi</h2>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card text-center border-success">
+    <div class="col-md-3">
+        <div class="card text-center border-success bg-dark text-white">
             <div class="card-body">
-                <h5 class="card-title">Toplam Antrenör</h5>
-                <h3>@ViewBag.AntrenorSayisi</h3>
+                <h6 class="text-muted">Toplam Antrenör</h6>
+                <h2>@ViewBag.AntrenorSayisi</h2>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card text-center border-warning">
+    <div class="col-md-3">
+        <div class="card text-center border-warning bg-dark text-white">
             <div class="card-body">
-                <h5 class="card-title">Toplam Randevu</h5>
-                <h3>@ViewBag.RandevuSayisi</h3>
+                <h6 class="text-muted">Toplam Randevu</h6>
+                <h2>@ViewBag.RandevuSayisi</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center border-info bg-dark text-white">
+            <div class="card-body">
+                <h6 class="text-muted">Haftalık Ciro</h6>
+                <h2>@ViewBag.HaftalikCiro ₺</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-title">Potansiyel Ciro</div>
+
+        <div class="stat-value">
+            @ViewBag.PotansiyelCiro.ToString("N2")
+            <span class="currency">₺</span>
+        </div>
+
+        <div class="stat-desc">
+            Bekleyen + ileri tarihli onaylı randevular
+        </div>
+    </div>
+
+
+
+</div>
+
+<!-- EKSTRA ÖZET -->
+<div class="row g-4 mt-2">
+
+    <div class="col-md-6">
+        <div class="card bg-dark text-white border-secondary">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Onaylanan Randevu</h6>
+                <h2 class="text-success">
+                    @(ViewBag.OnaylananRandevu ?? 0)
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card bg-dark text-white border-danger">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Bekleyen Randevu</h6>
+                <h2 class="text-warning">@ViewBag.BekleyenRandevu</h2>
             </div>
         </div>
     </div>
@@ -37,27 +89,24 @@
 </div>
 
 <!-- YÖNETİM BUTONLARI -->
-<div class="row mt-4">
-    <div class="col-md-6">
-        <a class="btn btn-outline-primary w-100" asp-action="Hizmetler">
-            Hizmet Yönetimi
+<div class="row mt-4 g-3">
+
+    <div class="col-md-4">
+        <a class="btn btn-outline-primary w-100 py-2" asp-action="Hizmetler">
+            💪 Hizmet Yönetimi
         </a>
     </div>
 
-
-    <div class="col-md-6">
-        <a class="btn btn-outline-success w-100" asp-action="Antrenorler">
-            Antrenör Yönetimi
+    <div class="col-md-4">
+        <a class="btn btn-outline-success w-100 py-2" asp-action="Antrenorler">
+            🧑‍🏫 Antrenör Yönetimi
         </a>
     </div>
 
-    <div class="col-md-8">
-        <a asp-controller="Admin"
-           asp-action="RandevuYonetimi"
-           class="btn btn-primary">
-            Randevu Yönetimi
+    <div class="col-md-4">
+        <a class="btn btn-outline-warning w-100 py-2" asp-action="RandevuYonetimi">
+            📅 Randevu Yönetimi
         </a>
     </div>
- 
 
 </div>

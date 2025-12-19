@@ -20,13 +20,66 @@ namespace SporSalonuRandevu.Controllers
         // ADMIN DASHBOARD
         public IActionResult Index()
         {
-            // Basit istatistikler
+            // =========================
+            // GENEL SAYILAR
+            // =========================
             ViewBag.HizmetSayisi = _context.Hizmetler.Count();
             ViewBag.AntrenorSayisi = _context.Antrenorler.Count();
-            ViewBag.RandevuSayisi = _context.Randevular.Count();
+
+            // Sadece Beklemede + Onaylandı
+            ViewBag.RandevuSayisi = _context.Randevular.Count(r =>
+                r.Durum == RandevuDurumu.Beklemede ||
+                r.Durum == RandevuDurumu.Onaylandi
+            );
+
+            // =========================
+            // RANDEVU DURUMLARI
+            // =========================
+            ViewBag.OnaylananRandevu = _context.Randevular.Count(r =>
+                r.Durum == RandevuDurumu.Onaylandi
+            );
+
+            ViewBag.BekleyenRandevu = _context.Randevular.Count(r =>
+                r.Durum == RandevuDurumu.Beklemede
+            );
+
+            // =========================
+            // TARİH HESAPLARI
+            // =========================
+            var bugun = DateTime.Today;
+            var birHaftaOnce = bugun.AddDays(-7);
+
+            // =========================
+            // HAFTALIK CİRO
+            // (Onaylı + son 7 gün + tarihi geçmiş)
+            // =========================
+            ViewBag.HaftalikCiro = _context.Randevular
+                .Include(r => r.Hizmet)
+                .Where(r =>
+                    r.Durum == RandevuDurumu.Onaylandi &&
+                    r.Tarih >= birHaftaOnce &&
+                    r.Tarih < bugun
+                )
+                .Sum(r => (decimal?)r.Hizmet.Ucret) ?? 0;
+
+            // =========================
+            // POTANSİYEL CİRO
+            // 1️⃣ Beklemede olanlar
+            // 2️⃣ Onaylı ama tarihi henüz gelmemiş olanlar
+            // =========================
+            ViewBag.PotansiyelCiro = _context.Randevular
+                .Include(r => r.Hizmet)
+                .Where(r =>
+                    r.Durum == RandevuDurumu.Beklemede ||
+                    (r.Durum == RandevuDurumu.Onaylandi && r.Tarih >= bugun)
+                )
+                .Sum(r => (decimal?)r.Hizmet.Ucret) ?? 0;
 
             return View();
         }
+
+
+
         // -------------------------
         // HİZMET LİSTELE
         // -------------------------
