@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SporSalonuRandevu.Data;
 using SporSalonuRandevu.Models;
+using System.Security.Claims;
 
 namespace SporSalonuRandevu.Controllers.Api
 {
@@ -16,8 +17,9 @@ namespace SporSalonuRandevu.Controllers.Api
             _context = context;
         }
 
-        // 🔥 LINQ KULLANAN API
-        // Seçilen hizmete göre randevusu olmayan antrenörleri getirir
+        // ======================================================
+        // 🔥 MÜSAİT ANTRENÖRLER
+        // ======================================================
         [HttpGet("MusaitAntrenorler")]
         public IActionResult MusaitAntrenorler(int hizmetId)
         {
@@ -35,13 +37,18 @@ namespace SporSalonuRandevu.Controllers.Api
             return Ok(antrenorler);
         }
 
-
-
+        // ======================================================
+        // 🔥 MÜSAİT SAATLER (GÜNCELLEME DESTEKLİ)
+        // ======================================================
         [HttpGet("MusaitSaatler")]
-        public IActionResult MusaitSaatler(int antrenorId, int hizmetId, DateTime tarih)
+        public IActionResult MusaitSaatler(
+            int antrenorId,
+            int hizmetId,
+            DateTime tarih,
+            int? randevuId = null // 👈 GÜNCELLEME İÇİN EKLENDİ
+        )
         {
-            // 1️⃣ GEÇMİŞ TARİH KONTROLÜ (YENİ)
-            // Eğer seçilen tarih bugünden önceyse direkt boş liste dön.
+            // ⛔ Geçmiş tarih engeli
             if (tarih.Date < DateTime.Today)
             {
                 return Ok(new List<string>());
@@ -50,76 +57,69 @@ namespace SporSalonuRandevu.Controllers.Api
             var antrenor = _context.Antrenorler.FirstOrDefault(a => a.Id == antrenorId);
             var hizmet = _context.Hizmetler.FirstOrDefault(h => h.Id == hizmetId);
 
-            if (antrenor == null || hizmet == null) return BadRequest("Veri bulunamadı.");
+            if (antrenor == null || hizmet == null)
+                return BadRequest("Veri bulunamadı.");
 
             var calismaBaslangic = antrenor.CalismaBaslangic;
             var calismaBitis = antrenor.CalismaBitis;
             var talepEdilenSure = TimeSpan.FromMinutes(hizmet.SureDakika);
 
-            // Gece yarısı geçiş düzeltmesi
+            // 🌙 Gece vardiyası desteği
             if (calismaBitis <= calismaBaslangic)
             {
                 calismaBitis = calismaBitis.Add(TimeSpan.FromDays(1));
             }
 
+            // 🔥 DOLU RANDEVULAR
             var randevularRaw = _context.Randevular
-               .Include(r => r.Hizmet)
-               .Where(r =>
-                   r.AntrenorId == antrenorId &&
-                   r.Tarih.Date == tarih.Date &&
-                   r.Durum != RandevuDurumu.IptalEdildi   // 🔥 KRİTİK SATIR
-               )
-               .Select(r => new
-               {
-                   BaslangicString = r.Saat,
-                   Sure = r.Hizmet.SureDakika
-               })
-               .ToList();
-
-
-            var doluAraliklar = randevularRaw.Select(r => new
-            {
-                Baslang = TimeSpan.Parse(r.BaslangicString),
-                Bitis = TimeSpan.Parse(r.BaslangicString).Add(TimeSpan.FromMinutes(r.Sure))
-            }).ToList();
+                .Include(r => r.Hizmet)
+                .Where(r =>
+                    r.AntrenorId == antrenorId &&
+                    r.Tarih.Date == tarih.Date &&
+                    r.Durum != RandevuDurumu.IptalEdildi &&
+                    (randevuId == null || r.Id != randevuId) // 🔥 KENDİ RANDEVUSUNU HARİÇ TUT
+                )
+                .Select(r => new
+                {
+                    Baslangic = TimeSpan.Parse(r.Saat),
+                    Bitis = TimeSpan.Parse(r.Saat)
+                        .Add(TimeSpan.FromMinutes(r.Hizmet.SureDakika))
+                })
+                .ToList();
 
             var uygunSaatler = new List<string>();
 
-            // Şu anki zamanı alıyoruz (Sadece saat kısmı)
-            var suankiAn = DateTime.Now.TimeOfDay;
-            for (var suankiSaat = calismaBaslangic;
-                 suankiSaat + talepEdilenSure <= calismaBitis;
-                 suankiSaat = suankiSaat.Add(TimeSpan.FromHours(1)))
+            for (var saat = calismaBaslangic;
+                 saat + talepEdilenSure <= calismaBitis;
+                 saat = saat.Add(TimeSpan.FromHours(1)))
             {
-                // 🔴 BUGÜN GEÇMİŞ SAATLERİ KESİN ENGELLE
+                // ⛔ Bugün geçmiş saat engeli
                 if (tarih.Date == DateTime.Today)
                 {
-                    var simdi = DateTime.Now.TimeOfDay;
-                    if (suankiSaat.Hours <= simdi.Hours)
+                    if (saat <= DateTime.Now.TimeOfDay)
                         continue;
                 }
 
-                var adayBaslangic = suankiSaat;
-                var adayBitis = suankiSaat + talepEdilenSure;
+                var adayBaslangic = saat;
+                var adayBitis = saat + talepEdilenSure;
 
-                bool cakismaVar = doluAraliklar.Any(dolu =>
+                bool cakismaVar = randevularRaw.Any(dolu =>
                     adayBaslangic < dolu.Bitis &&
-                    +adayBitis > dolu.Baslang
+                    adayBitis > dolu.Baslangic
                 );
 
                 if (!cakismaVar)
                 {
-                    uygunSaatler.Add(suankiSaat.ToString(@"hh\:mm"));
+                    uygunSaatler.Add(saat.ToString(@"hh\:mm"));
                 }
             }
-
 
             return Ok(uygunSaatler);
         }
 
-
-
-        // 1. BU SINIFI namespace'in içine ama class'ın dışına (veya en alta) ekle
+        // ======================================================
+        // 🔥 RANDEVU EKLE MODEL
+        // ======================================================
         public class RandevuEkleModel
         {
             public int AntrenorId { get; set; }
@@ -128,36 +128,31 @@ namespace SporSalonuRandevu.Controllers.Api
             public string Saat { get; set; }
         }
 
-        // 2. BU METODU Controller class'ının içine, MusaitSaatler'in altına ekle
+        // ======================================================
+        // 🔥 RANDEVU OLUŞTUR
+        // ======================================================
         [HttpPost("randevu-olustur")]
         public IActionResult RandevuOlustur([FromBody] RandevuEkleModel model)
         {
-            var uyeId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var uyeId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(uyeId))
-            {
                 return Unauthorized(new { mesaj = "Lütfen önce giriş yapınız." });
-            }
 
-            // 1️⃣ GEÇMİŞ TARİH/SAAT ENGELİ (YENİ)
-            // Seçilen tarih bugünden eskiyse HATA VER.
+            // ⛔ Geçmiş tarih engeli
             if (model.Tarih.Date < DateTime.Today)
-            {
                 return BadRequest("Geçmiş tarihe randevu alınamaz.");
-            }
 
-            // Eğer tarih BUGÜN ise ve saat şu andan eskiyse HATA VER.
             if (model.Tarih.Date == DateTime.Today)
             {
-                TimeSpan secilenSaat = TimeSpan.Parse(model.Saat);
-                if (secilenSaat < DateTime.Now.TimeOfDay)
-                {
+                var secilenSaat = TimeSpan.Parse(model.Saat);
+                if (secilenSaat <= DateTime.Now.TimeOfDay)
                     return BadRequest("Geçmiş saate randevu alınamaz.");
-                }
             }
 
             var hizmet = _context.Hizmetler.Find(model.HizmetId);
-            if (hizmet == null) return BadRequest("Hizmet bulunamadı.");
+            if (hizmet == null)
+                return BadRequest("Hizmet bulunamadı.");
 
             var yeniRandevu = new Randevu
             {
@@ -169,12 +164,10 @@ namespace SporSalonuRandevu.Controllers.Api
                 Durum = RandevuDurumu.Beklemede
             };
 
-
             _context.Randevular.Add(yeniRandevu);
             _context.SaveChanges();
 
             return Ok(new { mesaj = "Randevu başarıyla oluşturuldu!" });
         }
-
     }
 }

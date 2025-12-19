@@ -62,9 +62,9 @@ else
     @if (kalanSaat >= 6)
     {
         <script>
-            const mevcutSaat = "@Model.Saat";
             const antrenorId = @Model.AntrenorId;
             const hizmetId = @Model.HizmetId;
+            const randevuId = @Model.Id; // 🔥 KRİTİK
 
             const tarihInput = document.getElementById("tarihInput");
             const saatlerDiv = document.getElementById("saatler");
@@ -77,42 +77,46 @@ else
                 kaydetBtn.disabled = true;
                 secilenSaatInput.value = "";
 
-                fetch(`/api/RandevuApi/MusaitSaatler?antrenorId=${antrenorId}&hizmetId=${hizmetId}&tarih=${tarih}`)
+                fetch(`/api/RandevuApi/MusaitSaatler`
+                    + `?antrenorId=${antrenorId}`
+                    + `&hizmetId=${hizmetId}`
+                    + `&tarih=${tarih}`
+                    + `&randevuId=${randevuId}`) // 🔥 KRİTİK
                     .then(res => res.json())
                     .then(saatler => {
-                        saatler
-                            .filter(s => s !== mevcutSaat) // mevcut saat ASLA listelenmez
-                            .forEach(saat => {
-                                const btn = document.createElement("button");
-                                btn.type = "button";
-                                btn.className = "btn btn-outline-primary";
-                                btn.innerText = saat;
 
-                                btn.onclick = () => {
-                                    document.querySelectorAll("#saatler button")
-                                        .forEach(b => b.classList.remove("active"));
-
-                                    btn.classList.add("active");
-
-                                    secilenSaatInput.value = saat;
-                                    secilenTarihInput.value = tarih;
-                                    kaydetBtn.disabled = false;
-                                };
-
-                                saatlerDiv.appendChild(btn);
-                            });
-
-                        if (saatlerDiv.children.length === 0) {
+                        if (saatler.length === 0) {
                             saatlerDiv.innerHTML =
                                 `<span class="text-muted">Bu tarih için uygun saat yok.</span>`;
+                            return;
                         }
+
+                        saatler.forEach(saat => {
+                            const btn = document.createElement("button");
+                            btn.type = "button";
+                            btn.className = "btn btn-outline-primary";
+                            btn.innerText = saat;
+
+                            btn.onclick = () => {
+                                document.querySelectorAll("#saatler button")
+                                    .forEach(b => b.classList.remove("active"));
+
+                                btn.classList.add("active");
+
+                                secilenSaatInput.value = saat;
+                                secilenTarihInput.value = tarih;
+                                kaydetBtn.disabled = false;
+                            };
+
+                            saatlerDiv.appendChild(btn);
+                        });
                     });
             }
 
             // İlk yükleme
             saatleriGetir(tarihInput.value);
 
-            // Tarih değişince yeniden çek
+            // Tarih değişince
             tarihInput.addEventListener("change", () => {
                 saatleriGetir(tarihInput.value);
             });

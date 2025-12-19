@@ -17,24 +17,17 @@ namespace SporSalonuRandevu.Controllers
             _context = context;
         }
 
-        // ADMIN DASHBOARD
+        // DASHBOARD
         public IActionResult Index()
         {
-            // =========================
-            // GENEL SAYILAR
-            // =========================
             ViewBag.HizmetSayisi = _context.Hizmetler.Count();
             ViewBag.AntrenorSayisi = _context.Antrenorler.Count();
 
-            // Sadece Beklemede + Onaylandı
             ViewBag.RandevuSayisi = _context.Randevular.Count(r =>
                 r.Durum == RandevuDurumu.Beklemede ||
                 r.Durum == RandevuDurumu.Onaylandi
             );
 
-            // =========================
-            // RANDEVU DURUMLARI
-            // =========================
             ViewBag.OnaylananRandevu = _context.Randevular.Count(r =>
                 r.Durum == RandevuDurumu.Onaylandi
             );
@@ -43,16 +36,9 @@ namespace SporSalonuRandevu.Controllers
                 r.Durum == RandevuDurumu.Beklemede
             );
 
-            // =========================
-            // TARİH HESAPLARI
-            // =========================
             var bugun = DateTime.Today;
             var birHaftaOnce = bugun.AddDays(-7);
 
-            // =========================
-            // HAFTALIK CİRO
-            // (Onaylı + son 7 gün + tarihi geçmiş)
-            // =========================
             ViewBag.HaftalikCiro = _context.Randevular
                 .Include(r => r.Hizmet)
                 .Where(r =>
@@ -62,11 +48,6 @@ namespace SporSalonuRandevu.Controllers
                 )
                 .Sum(r => (decimal?)r.Hizmet.Ucret) ?? 0;
 
-            // =========================
-            // POTANSİYEL CİRO
-            // 1️⃣ Beklemede olanlar
-            // 2️⃣ Onaylı ama tarihi henüz gelmemiş olanlar
-            // =========================
             ViewBag.PotansiyelCiro = _context.Randevular
                 .Include(r => r.Hizmet)
                 .Where(r =>
@@ -78,28 +59,17 @@ namespace SporSalonuRandevu.Controllers
             return View();
         }
 
-
-
-        // -------------------------
-        // HİZMET LİSTELE
-        // -------------------------
+        // HİZMETLER
         public IActionResult Hizmetler()
         {
-            var hizmetler = _context.Hizmetler.ToList();
-            return View(hizmetler);
+            return View(_context.Hizmetler.ToList());
         }
 
-        // -------------------------
-        // HİZMET EKLE (GET)
-        // -------------------------
         public IActionResult HizmetEkle()
         {
             return View();
         }
 
-        // -------------------------
-        // HİZMET EKLE (POST)
-        // -------------------------
         [HttpPost]
         public IActionResult HizmetEkle(Hizmet hizmet)
         {
@@ -108,13 +78,27 @@ namespace SporSalonuRandevu.Controllers
 
             _context.Hizmetler.Add(hizmet);
             _context.SaveChanges();
-
             return RedirectToAction(nameof(Hizmetler));
         }
 
-        // -------------------------
-        // HİZMET SİL
-        // -------------------------
+        public IActionResult HizmetGuncelle(int id)
+        {
+            var hizmet = _context.Hizmetler.Find(id);
+            if (hizmet == null) return NotFound();
+            return View(hizmet);
+        }
+
+        [HttpPost]
+        public IActionResult HizmetGuncelle(Hizmet hizmet)
+        {
+            if (!ModelState.IsValid)
+                return View(hizmet);
+
+            _context.Hizmetler.Update(hizmet);
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Hizmetler));
+        }
+
         public IActionResult HizmetSil(int id)
         {
             var hizmet = _context.Hizmetler.Find(id);
@@ -125,52 +109,17 @@ namespace SporSalonuRandevu.Controllers
             }
             return RedirectToAction(nameof(Hizmetler));
         }
-        // -------------------------
-        // HİZMET GÜNCELLE (GET)
-        // -------------------------
-        public IActionResult HizmetGuncelle(int id)
-        {
-            var hizmet = _context.Hizmetler.Find(id);
-            if (hizmet == null)
-                return NotFound();
 
-            return View(hizmet);
-        }
-
-        // -------------------------
-        // HİZMET GÜNCELLE (POST)
-        // -------------------------
-        [HttpPost]
-        public IActionResult HizmetGuncelle(Hizmet hizmet)
-        {
-            if (!ModelState.IsValid)
-                return View(hizmet);
-
-            _context.Hizmetler.Update(hizmet);
-            _context.SaveChanges();
-
-            return RedirectToAction(nameof(Hizmetler));
-        }
-
-        // =========================
-        // ANTRONÖR LİSTELE
-        // =========================
+        // ANTRENÖRLER
         public IActionResult Antrenorler()
         {
             return View(_context.Antrenorler.ToList());
         }
 
-        // =========================
-        // EKLE (GET)
-        // =========================
         public IActionResult AntrenorEkle()
         {
             return View();
         }
-
-        // =========================
-        // EKLE (POST)
-        // =========================
 
         [HttpPost]
         public IActionResult AntrenorEkle(Antrenor antrenor)
@@ -180,23 +129,16 @@ namespace SporSalonuRandevu.Controllers
 
             _context.Antrenorler.Add(antrenor);
             _context.SaveChanges();
-
-            return RedirectToAction("Antrenorler");
+            return RedirectToAction(nameof(Antrenorler));
         }
 
-
-        // =========================
-        // GÜNCELLE (GET)
-        // =========================
         public IActionResult AntrenorGuncelle(int id)
         {
             var antrenor = _context.Antrenorler.Find(id);
+            if (antrenor == null) return NotFound();
             return View(antrenor);
         }
 
-        // =========================
-        // GÜNCELLE (POST)
-        // =========================
         [HttpPost]
         public IActionResult AntrenorGuncelle(Antrenor antrenor)
         {
@@ -205,23 +147,21 @@ namespace SporSalonuRandevu.Controllers
 
             _context.Antrenorler.Update(antrenor);
             _context.SaveChanges();
-
-            return RedirectToAction("Antrenorler");
+            return RedirectToAction(nameof(Antrenorler));
         }
 
-
-        // =========================
-        // SİL
-        // =========================
         public IActionResult AntrenorSil(int id)
         {
             var antrenor = _context.Antrenorler.Find(id);
-            _context.Antrenorler.Remove(antrenor);
-            _context.SaveChanges();
-            return RedirectToAction("Antrenorler");
+            if (antrenor != null)
+            {
+                _context.Antrenorler.Remove(antrenor);
+                _context.SaveChanges();
+            }
+            return RedirectToAction(nameof(Antrenorler));
         }
 
-        [Authorize(Roles = "Admin")]
+        // RANDEVU YÖNETİMİ
         public IActionResult RandevuYonetimi()
         {
             var randevular = _context.Randevular
@@ -234,58 +174,44 @@ namespace SporSalonuRandevu.Controllers
             return View(randevular);
         }
 
-        [Authorize(Roles = "Admin")]
         public IActionResult RandevuOnayla(int id)
         {
             var randevu = _context.Randevular
                 .Include(r => r.Hizmet)
                 .FirstOrDefault(r => r.Id == id);
 
-            if (randevu == null)
-                return NotFound();
+            if (randevu == null) return NotFound();
 
             randevu.Durum = RandevuDurumu.Onaylandi;
 
-            // 🔔 BİLDİRİM OLUŞTUR
             _context.Bildirimler.Add(new Bildirim
             {
                 UyeId = randevu.UyeId,
-                Mesaj = $"✅ {randevu.Tarih:dd.MM.yyyy} tarihli {randevu.Saat} saatli " +
-                        $"{randevu.Hizmet.Ad} randevunuz ONAYLANDI."
+                Mesaj = $"✅ {randevu.Tarih:dd.MM.yyyy} {randevu.Saat} - {randevu.Hizmet.Ad} randevunuz ONAYLANDI."
             });
 
             _context.SaveChanges();
-
-            return RedirectToAction("RandevuYonetimi");
+            return RedirectToAction(nameof(RandevuYonetimi));
         }
 
-        [Authorize(Roles = "Admin")]
         public IActionResult RandevuIptal(int id)
         {
             var randevu = _context.Randevular
                 .Include(r => r.Hizmet)
                 .FirstOrDefault(r => r.Id == id);
 
-            if (randevu == null)
-                return NotFound();
+            if (randevu == null) return NotFound();
 
             randevu.Durum = RandevuDurumu.IptalEdildi;
 
-            // 🔔 BİLDİRİM OLUŞTUR
             _context.Bildirimler.Add(new Bildirim
             {
                 UyeId = randevu.UyeId,
-                Mesaj = $"❌ {randevu.Tarih:dd.MM.yyyy} tarihli {randevu.Saat} saatli " +
-                        $"{randevu.Hizmet.Ad} randevunuz İPTAL EDİLDİ."
+                Mesaj = $"❌ {randevu.Tarih:dd.MM.yyyy} {randevu.Saat} - {randevu.Hizmet.Ad} randevunuz İPTAL EDİLDİ."
             });
 
             _context.SaveChanges();
-
-            return RedirectToAction("RandevuYonetimi");
+            return RedirectToAction(nameof(RandevuYonetimi));
         }
-
-
-
-
     }
 }

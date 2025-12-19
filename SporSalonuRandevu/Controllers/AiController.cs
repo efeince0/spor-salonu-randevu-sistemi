@@ -79,14 +79,15 @@ namespace SporSalonuRandevu.Controllers
                 // Servise "ekNotlar"ı da gönderiyoruz
                 aiCevap = await _geminiService.DiyetVeEgzersizOlustur(
                     uye.Yas.Value,
-                    uye.Boy.Value,
-                    (int)uye.Kilo.Value,
+                    (int)uye.Boy.Value,   // 'double' olan değeri 'int'e çevirdik
+                    (int)uye.Kilo.Value,  // 'double' olan değeri 'int'e çevirdik
                     hedefKilo,
                     bmi,
                     idealMin,
                     idealMax,
-                    ekNotlar // <--- Yeni parametre
+                    ekNotlar
                 );
+
             }
             catch (Exception ex)
             {
