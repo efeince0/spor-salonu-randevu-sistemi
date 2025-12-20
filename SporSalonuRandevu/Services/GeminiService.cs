@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using System.Text.Json; // System.Text.Json kullandığınız için buna sadık kaldım
+using System.Text.Json; 
 
 namespace SporSalonuRandevu.Services
 {
@@ -18,7 +18,7 @@ namespace SporSalonuRandevu.Services
      int yas, int boy, int kilo, double hedefKilo, double bmi,
      double idealMin, double idealMax, string ekNotlar) // <--- 1. BURAYI EKLEDİK
         {
-            // 2. Prompt'u hem tablo isteyecek hem de notları dikkate alacak şekilde güncelliyoruz:
+            // girilen parametrelere göre prompt oluşturur html olarak verir 
             var prompt = $@"
     Sen uzman bir spor koçu ve diyetisyensin.
     
@@ -53,7 +53,7 @@ namespace SporSalonuRandevu.Services
             var jsonContent = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            // Modelin (1.5 Flash veya Pro) URL'i buraya gelecek
+            // 2.5 pro modelini kullandım
             var response = await _httpClient.PostAsync(
       $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key={_apiKey}",
       content
@@ -80,7 +80,6 @@ namespace SporSalonuRandevu.Services
                         .GetProperty("text")
                         .GetString();
 
-                    // Gemini bazen inatla ```html ekler, onları temizleyelim ki sayfa bozulmasın
                     return text.Replace("```html", "").Replace("```", "");
                 }
             }

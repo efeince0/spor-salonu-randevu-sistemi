@@ -9,7 +9,7 @@ namespace SporSalonuRandevu.Models
         [StringLength(60, ErrorMessage = "Ad Soyad en fazla 60 karakter olabilir.")]
         public string AdSoyad { get; set; } = null!;
 
-        // 🔽 AŞAĞIDAKİLER OPSİYONEL 🔽
+        // opsiyonel alanlar
 
         [Range(10, 100, ErrorMessage = "Yaş 10-100 arasında olmalıdır.")]
         public int? Yas { get; set; }

@@ -20,30 +20,27 @@ namespace SporSalonuRandevu.Controllers
             _geminiService = geminiService;
         }
 
-        // =======================
-        // GET (Sayfa Açılışı)
-        // =======================
+        // get
         [HttpGet]
         public async Task<IActionResult> DiyetEgzersiz()
         {
             var uye = await _userManager.GetUserAsync(User);
 
-            // 1. Session'da daha önce kaydedilmiş bir plan var mı kontrol et
+            // 1. Session'da daha önce kaydedilmiş bir plan var mı kontrol edilir
             var kayitliPlan = HttpContext.Session.GetString("DiyetPlani");
 
             if (!string.IsNullOrEmpty(kayitliPlan))
             {
-                // Varsa ViewBag'e at, böylece sayfa yenilense de plan ekranda kalır
+                // Varsa ViewBag'e at, böylece sayfa yenilense de plan ekranda kalsın
                 ViewBag.Plan = kayitliPlan;
             }
 
             return View(uye);
         }
 
-        // =======================
-        // POST (Form Gönderimi)
-        // =======================
-        [HttpPost]
+
+        
+        [HttpPost] //post
         public async Task<IActionResult> DiyetEgzersiz(double hedefKilo, string ekNotlar)
         {
             var uye = await _userManager.GetUserAsync(User);
@@ -51,7 +48,7 @@ namespace SporSalonuRandevu.Controllers
             if (uye == null)
                 return RedirectToAction("Login", "Account");
 
-            // ---- PROFİL BİLGİ KONTROLÜ ----
+            // profil bilgileri eksik mi kontrolü
             if (!uye.Boy.HasValue || !uye.Kilo.HasValue || !uye.Yas.HasValue)
             {
                 ViewBag.Hata = "❗ Profil bilgileriniz eksik. Lütfen profil sayfasından boy, kilo ve yaş bilgilerinizi doldurun.";
@@ -64,23 +61,23 @@ namespace SporSalonuRandevu.Controllers
                 return View(uye);
             }
 
-            // ---- HESAPLAMALAR ----
+            //  HESAPLAMALAR 
             double boyMetre = uye.Boy.Value / 100.0;
             double kilo = uye.Kilo.Value;
             double bmi = kilo / (boyMetre * boyMetre);
             double idealMin = 18.5 * boyMetre * boyMetre;
             double idealMax = 24.9 * boyMetre * boyMetre;
 
-            // ---- AI ÇAĞRISI ----
+            // ai çağrısı
             string aiCevap;
 
             try
             {
-                // Servise "ekNotlar"ı da gönderiyoruz
+               
                 aiCevap = await _geminiService.DiyetVeEgzersizOlustur(
                     uye.Yas.Value,
-                    (int)uye.Boy.Value,   // 'double' olan değeri 'int'e çevirdik
-                    (int)uye.Kilo.Value,  // 'double' olan değeri 'int'e çevirdik
+                    (int)uye.Boy.Value,   
+                    (int)uye.Kilo.Value,  
                     hedefKilo,
                     bmi,
                     idealMin,
@@ -98,18 +95,14 @@ namespace SporSalonuRandevu.Controllers
                 }
             }
 
-            // 2. Sonucu Session'a kaydet (Kalıcı olması için)
+            //  Session'a kaydet (Kalıcı olması için)
             HttpContext.Session.SetString("DiyetPlani", aiCevap);
 
-            // 3. PRG (Post-Redirect-Get) Deseni:
-            // Doğrudan View döndürmek yerine Redirect yapıyoruz.
-            // Bu sayede sayfa yenilendiğinde "Formu tekrar gönder?" uyarısı çıkmaz ve veri kaybolmaz.
+           
             return RedirectToAction("DiyetEgzersiz");
         }
 
-        // =======================
-        // PLAN TEMİZLEME
-        // =======================
+   
         [HttpGet]
         public IActionResult PlaniTemizle()
         {

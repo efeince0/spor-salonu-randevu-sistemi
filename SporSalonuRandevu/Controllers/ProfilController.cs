@@ -18,17 +18,14 @@ public class ProfilController : Controller
         _userManager = userManager;
     }
 
-    // ===============================
     // PROFİL SAYFASI (Ana)
-    // ===============================
     public IActionResult Index()
     {
         return View();
     }
 
-    // ===============================
+  
     // PROFİL BİLGİLERİ
-    // ===============================
     [Authorize]
     public async Task<IActionResult> Bilgilerim()
     {
@@ -60,9 +57,7 @@ public class ProfilController : Controller
         return View(uye);
     }
 
-    // ===============================
     // ŞİFRE DEĞİŞTİR
-    // ===============================
     public IActionResult SifreDegistir()
     {
         return View();
@@ -86,9 +81,7 @@ public class ProfilController : Controller
         return View();
     }
 
-    // ===============================
-    // RANDEVULARIM
-    // ===============================
+// RANDEVULARIM
     public async Task<IActionResult> Randevularim()
     {
         var uyeId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -103,9 +96,9 @@ public class ProfilController : Controller
         return View(randevular);
     }
 
-    // ===============================
+   
     // ÜYE RANDEVU İPTAL
-    // ===============================
+  
     public IActionResult RandevuIptal(int id)
     {
         var uyeId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -154,15 +147,15 @@ public class ProfilController : Controller
         if (randevu == null)
             return NotFound();
 
-        // 🔒 İptal edilmiş randevu güncellenemez
+        //  İptal edilmiş randevu güncellenemez
         if (randevu.Durum == RandevuDurumu.IptalEdildi)
             return BadRequest("İptal edilmiş randevu güncellenemez.");
 
-        // 🔥 TARİH + SAAT GÜNCELLE
+        //  TARİH + SAAT GÜNCELLE
         randevu.Tarih = tarih;
         randevu.Saat = saat;
 
-        // 🔥 GÜNCELLEME VARSA TEKRAR ONAY BEKLESİN
+        //  GÜNCELLEME VARSA TEKRAR ONAY BEKLESİN
         randevu.Durum = RandevuDurumu.Beklemede;
 
         _context.SaveChanges();

@@ -31,7 +31,7 @@ namespace SporSalonuRandevu.Controllers
         // spor salonu için randevu listleyen controller metodu
         public IActionResult RandevuListesi()
         {
-            // Burada randevu listesini veritabanýndan çekip View'a gönderebilirsiniz.
+            
             return View();
         }
 

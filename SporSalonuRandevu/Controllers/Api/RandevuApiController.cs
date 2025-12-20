@@ -17,9 +17,7 @@ namespace SporSalonuRandevu.Controllers.Api
             _context = context;
         }
 
-        // ======================================================
-        // 🔥 MÜSAİT ANTRENÖRLER
-        // ======================================================
+        //  MÜSAİT ANTRENÖRLER
         [HttpGet("MusaitAntrenorler")]
         public IActionResult MusaitAntrenorler(int hizmetId)
         {
@@ -37,18 +35,16 @@ namespace SporSalonuRandevu.Controllers.Api
             return Ok(antrenorler);
         }
 
-        // ======================================================
-        // 🔥 MÜSAİT SAATLER (GÜNCELLEME DESTEKLİ)
-        // ======================================================
+        //  MÜSAİT SAATLER
         [HttpGet("MusaitSaatler")]
         public IActionResult MusaitSaatler(
             int antrenorId,
             int hizmetId,
             DateTime tarih,
-            int? randevuId = null // 👈 GÜNCELLEME İÇİN EKLENDİ
+            int? randevuId = null 
         )
         {
-            // ⛔ Geçmiş tarih engeli
+            //  Geçmiş tarih engeli
             if (tarih.Date < DateTime.Today)
             {
                 return Ok(new List<string>());
@@ -64,20 +60,20 @@ namespace SporSalonuRandevu.Controllers.Api
             var calismaBitis = antrenor.CalismaBitis;
             var talepEdilenSure = TimeSpan.FromMinutes(hizmet.SureDakika);
 
-            // 🌙 Gece vardiyası desteği
+            
             if (calismaBitis <= calismaBaslangic)
             {
                 calismaBitis = calismaBitis.Add(TimeSpan.FromDays(1));
             }
 
-            // 🔥 DOLU RANDEVULAR
+            //  DOLU RANDEVULAR
             var randevularRaw = _context.Randevular
                 .Include(r => r.Hizmet)
                 .Where(r =>
                     r.AntrenorId == antrenorId &&
                     r.Tarih.Date == tarih.Date &&
                     r.Durum != RandevuDurumu.IptalEdildi &&
-                    (randevuId == null || r.Id != randevuId) // 🔥 KENDİ RANDEVUSUNU HARİÇ TUT
+                    (randevuId == null || r.Id != randevuId) //  KENDİ RANDEVUSUNU HARİÇ TUT
                 )
                 .Select(r => new
                 {
@@ -93,7 +89,7 @@ namespace SporSalonuRandevu.Controllers.Api
                  saat + talepEdilenSure <= calismaBitis;
                  saat = saat.Add(TimeSpan.FromHours(1)))
             {
-                // ⛔ Bugün geçmiş saat engeli
+                //  Bugün geçmiş saat engeli
                 if (tarih.Date == DateTime.Today)
                 {
                     if (saat <= DateTime.Now.TimeOfDay)
@@ -117,9 +113,8 @@ namespace SporSalonuRandevu.Controllers.Api
             return Ok(uygunSaatler);
         }
 
-        // ======================================================
-        // 🔥 RANDEVU EKLE MODEL
-        // ======================================================
+        //  RANDEVU EKLE MODEL
+        
         public class RandevuEkleModel
         {
             public int AntrenorId { get; set; }
@@ -128,9 +123,9 @@ namespace SporSalonuRandevu.Controllers.Api
             public string Saat { get; set; }
         }
 
-        // ======================================================
-        // 🔥 RANDEVU OLUŞTUR
-        // ======================================================
+       
+        //  RANDEVU OLUŞTUR
+       
         [HttpPost("randevu-olustur")]
         public IActionResult RandevuOlustur([FromBody] RandevuEkleModel model)
         {
@@ -139,7 +134,7 @@ namespace SporSalonuRandevu.Controllers.Api
             if (string.IsNullOrEmpty(uyeId))
                 return Unauthorized(new { mesaj = "Lütfen önce giriş yapınız." });
 
-            // ⛔ Geçmiş tarih engeli
+            // Geçmiş tarih engeli
             if (model.Tarih.Date < DateTime.Today)
                 return BadRequest("Geçmiş tarihe randevu alınamaz.");
 

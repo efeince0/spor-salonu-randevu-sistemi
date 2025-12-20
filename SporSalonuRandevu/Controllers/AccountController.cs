@@ -37,7 +37,7 @@ namespace SporSalonuRandevu.Controllers
                 // Admin mi kontrolü
                 if (await _userManager.IsInRoleAsync(user, "Admin"))
                 {
-                    return RedirectToAction("Index", "Admin"); // Admin paneline yönlendirme
+                    return RedirectToAction("Index", "Admin"); 
                 }
 
                 return RedirectToAction("Index", "Home"); // Normal kullanıcıyı anasayfaya yönlendir
@@ -69,7 +69,7 @@ namespace SporSalonuRandevu.Controllers
 
             if (result.Succeeded)
             {
-                // 🔥 EN KRİTİK SATIR
+                
                 await _userManager.AddToRoleAsync(uye, "Uye");
 
                 await _signInManager.SignInAsync(uye, false);

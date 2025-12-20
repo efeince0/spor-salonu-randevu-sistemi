@@ -8,18 +8,17 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===============================
+
 // DATABASE (PostgreSQL)
-// ===============================
+
 builder.Services.AddDbContext<UygulamaDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ===============================
 // IDENTITY
-// ===============================
+
 builder.Services.AddIdentity<Uye, IdentityRole>(options =>
 {
-    // 🔥 ŞİFRE KURALLARI (Geliştirme ortamı için basitleştirilmiş)
+    // şifre kurallarını kaldırdım
     options.Password.RequireDigit = false;
     options.Password.RequireLowercase = false;
     options.Password.RequireUppercase = false;
@@ -31,32 +30,27 @@ builder.Services.AddIdentity<Uye, IdentityRole>(options =>
 .AddEntityFrameworkStores<UygulamaDbContext>()
 .AddDefaultTokenProviders();
 
-// ===============================
-// MVC & SESSION (BURASI EKLENDİ)
-// ===============================
+
 builder.Services.AddControllersWithViews();
 
-// 🟢 1. SESSION SERVİSİ EKLENDİ (Diyet listesi hafızada kalsın diye)
+// session
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // 30 dakika hafızada tutar
+    options.IdleTimeout = TimeSpan.FromMinutes(10000); 
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
-// 🟢 2. HTTP CLIENT TIMEOUT AYARI (Uzun süren AI cevapları için)
 builder.Services.AddHttpClient<GeminiService>(client =>
 {
-    // Varsayılan 100 saniyedir, AI bazen uzun düşünür, bunu 5 dk yaptık.
     client.Timeout = TimeSpan.FromMinutes(5);
 });
 
 
 var app = builder.Build();
 
-// ===============================
+
 // MIDDLEWARE
-// ===============================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -68,22 +62,18 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 🟢 3. SESSION MIDDLEWARE EKLENDİ (Authentication'dan önce olmalı)
 app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ===============================
+
 // ROUTE
-// ===============================
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// ===============================
 // ROL + ADMIN SEED
-// ===============================
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();

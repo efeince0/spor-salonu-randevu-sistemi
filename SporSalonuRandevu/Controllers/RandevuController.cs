@@ -30,13 +30,12 @@ namespace SporSalonuRandevu.Controllers
         [Authorize(Roles = "Uye")]
         public IActionResult AntrenorSec(int hizmetId)
         {
-            // Veritabanındaki TÜM antrenörleri getiriyoruz.
-            // Randevusu olup olmaması umurumuzda değil, çünkü hepsi listelenmeli.
+            
             var antrenorler = _context.Antrenorler.ToList();
 
             ViewBag.HizmetId = hizmetId;
 
-            // Listeyi sayfaya (View) gönderiyoruz
+            
             return View(antrenorler);
         }
 
@@ -78,8 +77,8 @@ namespace SporSalonuRandevu.Controllers
             if (antrenor == null)
                 return NotFound();
 
-            var baslangic = antrenor.CalismaBaslangic; // TimeSpan
-            var bitis = antrenor.CalismaBitis;         // TimeSpan
+            var baslangic = antrenor.CalismaBaslangic; 
+            var bitis = antrenor.CalismaBitis;         
 
             var saatler = new List<TimeSpan>();
 

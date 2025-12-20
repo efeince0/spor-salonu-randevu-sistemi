@@ -23,7 +23,7 @@
 <body>
     <div class="app-layout">
 
-        <!-- ================= SIDEBAR ================= -->
+        <!--SIDEBAR -->
         <aside class="sidebar">
 
             <!-- LOGO -->
@@ -31,7 +31,7 @@
                 🏋️ <span>SporSalonu</span>
             </div>
 
-            <!-- ================= MENÜ ================= -->
+            <!--  MENÜ  -->
             <nav class="sidebar-nav">
 
                 @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
@@ -63,7 +63,7 @@
 
 
 
-                @* ========== UYE MENÜ ========== *@
+                @* UYE MENÜ *@
                 @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Uye"))
                 {
                     <a asp-controller="Home" asp-action="Index" class="nav-item">
@@ -84,7 +84,7 @@
                 }
             </nav>
 
-            <!-- ================= FOOTER ================= -->
+            <!--  FOOTER  -->
             <div class="sidebar-footer">
 
                 @if (User.Identity?.IsAuthenticated == true)
@@ -127,7 +127,7 @@
             </div>
         </aside>
 
-        <!-- ================= CONTENT ================= -->
+        <!--  CONTENT  -->
         <main class="content">
             @RenderBody()
         </main>
